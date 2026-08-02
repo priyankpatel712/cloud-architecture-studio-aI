@@ -3,7 +3,7 @@ import 'server-only';
 /**
  * Email provider abstraction (research R5, FR-003/FR-004).
  *
- * Primary transport: Mailtrap Nodemailer SMTP.
+ * Primary transport: Mailtrap Nodemailer SMTP (Port 587).
  * Fallbacks: Resend API or Dev console logger.
  */
 
@@ -31,7 +31,7 @@ export function appBaseUrl(): string {
 async function sendViaSmtp(msg: EmailMessage): Promise<SendResult> {
   const nodemailer = await import('nodemailer');
   const host = process.env.SMTP_HOST || 'sandbox.smtp.mailtrap.io';
-  const port = Number(process.env.SMTP_PORT || 2525);
+  const port = Number(process.env.SMTP_PORT || 587);
   const user = process.env.SMTP_USER || '158651ef857574';
   const pass = process.env.SMTP_PASS || '90a9a4499b856a';
   const from = process.env.EMAIL_FROM || 'Cloud Architecture Studio <from@example.com>';
@@ -40,6 +40,9 @@ async function sendViaSmtp(msg: EmailMessage): Promise<SendResult> {
     host,
     port,
     secure: false,
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 10000,
     auth: { user, pass },
   });
 

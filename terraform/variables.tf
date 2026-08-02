@@ -117,7 +117,7 @@ variable "smtp_host" {
 variable "smtp_port" {
   type        = string
   description = "SMTP Port for Mailtrap"
-  default     = "2525"
+  default     = "587"
 }
 
 variable "smtp_user" {
