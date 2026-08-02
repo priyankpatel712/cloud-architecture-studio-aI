@@ -203,3 +203,87 @@ resource "vercel_project_environment_variable" "env_email_from" {
   value      = var.email_from
   target     = ["production", "preview", "development"]
 }
+
+resource "vercel_project_environment_variable" "env_app_base_url" {
+  project_id = vercel_project.cas_vercel_project.id
+  key        = "APP_BASE_URL"
+  value      = var.app_base_url
+  target     = ["production", "preview", "development"]
+}
+
+resource "vercel_project_environment_variable" "env_aws_mcp_command" {
+  project_id = vercel_project.cas_vercel_project.id
+  key        = "AWS_MCP_COMMAND"
+  value      = var.aws_mcp_command
+  target     = ["production", "preview", "development"]
+}
+
+resource "vercel_project_environment_variable" "env_aws_mcp_tool" {
+  project_id = vercel_project.cas_vercel_project.id
+  key        = "AWS_MCP_TOOL"
+  value      = var.aws_mcp_tool
+  target     = ["production", "preview", "development"]
+}
+
+resource "vercel_project_environment_variable" "env_aws_cost_mcp_command" {
+  project_id = vercel_project.cas_vercel_project.id
+  key        = "AWS_COST_MCP_COMMAND"
+  value      = var.aws_cost_mcp_command
+  target     = ["production", "preview", "development"]
+}
+
+resource "vercel_project_environment_variable" "env_mongodb_mcp_command" {
+  project_id = vercel_project.cas_vercel_project.id
+  key        = "MONGODB_MCP_COMMAND"
+  value      = var.mongodb_mcp_command
+  target     = ["production", "preview", "development"]
+}
+
+resource "vercel_project_environment_variable" "env_mongodb_mcp_tool" {
+  project_id = vercel_project.cas_vercel_project.id
+  key        = "MONGODB_MCP_TOOL"
+  value      = var.mongodb_mcp_tool
+  target     = ["production", "preview", "development"]
+}
+
+resource "vercel_project_environment_variable" "env_aws_docs_mcp_command" {
+  project_id = vercel_project.cas_vercel_project.id
+  key        = "AWS_DOCS_MCP_COMMAND"
+  value      = var.aws_docs_mcp_command
+  target     = ["production", "preview", "development"]
+}
+
+resource "vercel_project_environment_variable" "env_knowledge_store_enabled" {
+  project_id = vercel_project.cas_vercel_project.id
+  key        = "KNOWLEDGE_STORE_ENABLED"
+  value      = var.knowledge_store_enabled
+  target     = ["production", "preview", "development"]
+}
+
+resource "vercel_project_environment_variable" "env_web_research_enabled" {
+  project_id = vercel_project.cas_vercel_project.id
+  key        = "WEB_RESEARCH_ENABLED"
+  value      = var.web_research_enabled
+  target     = ["production", "preview", "development"]
+}
+
+resource "vercel_project_environment_variable" "env_aws_sso_region" {
+  project_id = vercel_project.cas_vercel_project.id
+  key        = "AWS_SSO_REGION"
+  value      = var.aws_sso_region
+  target     = ["production", "preview", "development"]
+}
+
+resource "vercel_project_environment_variable" "env_aws_region" {
+  project_id = vercel_project.cas_vercel_project.id
+  key        = "AWS_REGION"
+  value      = var.aws_region
+  target     = ["production", "preview", "development"]
+}
+
+resource "vercel_project_environment_variable" "env_atlas_api_base" {
+  project_id = vercel_project.cas_vercel_project.id
+  key        = "ATLAS_API_BASE"
+  value      = var.atlas_api_base
+  target     = ["production", "preview", "development"]
+}

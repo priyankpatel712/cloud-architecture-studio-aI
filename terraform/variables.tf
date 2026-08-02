@@ -138,3 +138,63 @@ variable "email_from" {
   description = "Default Email From address"
   default     = "Cloud Architecture Studio <from@example.com>"
 }
+
+variable "aws_mcp_command" {
+  type        = string
+  default     = "npx -y mcp-remote@latest https://knowledge-mcp.global.api.aws"
+}
+
+variable "aws_mcp_tool" {
+  type        = string
+  default     = "aws___search_documentation"
+}
+
+variable "aws_cost_mcp_command" {
+  type        = string
+  default     = "uvx awslabs.aws-pricing-mcp-server@latest"
+}
+
+variable "mongodb_mcp_command" {
+  type        = string
+  default     = "npx -y mongodb-mcp-server@latest"
+}
+
+variable "mongodb_mcp_tool" {
+  type        = string
+  default     = "search-knowledge"
+}
+
+variable "aws_docs_mcp_command" {
+  type        = string
+  default     = "uvx awslabs.aws-documentation-mcp-server@latest"
+}
+
+variable "knowledge_store_enabled" {
+  type        = string
+  default     = "true"
+}
+
+variable "web_research_enabled" {
+  type        = string
+  default     = "false"
+}
+
+variable "aws_sso_region" {
+  type        = string
+  default     = "us-east-1"
+}
+
+variable "aws_region" {
+  type        = string
+  default     = "us-east-1"
+}
+
+variable "atlas_api_base" {
+  type        = string
+  default     = "https://cloud.mongodb.com"
+}
+
+variable "app_base_url" {
+  type        = string
+  default     = "https://cloud-architecture-studio-a-i-wu6n.vercel.app"
+}
