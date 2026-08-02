@@ -49,6 +49,9 @@ export async function proxy(req: NextRequest) {
   // Email-verification gate (FR-004): an unverified session is corralled to /verify
   // until the emailed link is confirmed — no workspace or admin access before that.
   if (!session.verified) {
+    if (pathname === '/forgot-password' || pathname === '/reset-password') {
+      return NextResponse.next();
+    }
     return NextResponse.redirect(new URL('/verify', req.url));
   }
 

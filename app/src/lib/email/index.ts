@@ -24,10 +24,10 @@ export interface SendResult {
 }
 
 export function appBaseUrl(): string {
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL.replace(/\/$/, '')}`;
+  if (process.env.APP_BASE_URL) {
+    return process.env.APP_BASE_URL.replace(/\/$/, '');
   }
-  return (process.env.APP_BASE_URL ?? 'https://cloud-architecture-studio-a-i-wu6n.vercel.app').replace(/\/$/, '');
+  return 'https://cloud-architecture-studio-a-i-wu6n.vercel.app';
 }
 
 async function sendViaSmtp(msg: EmailMessage): Promise<SendResult> {
