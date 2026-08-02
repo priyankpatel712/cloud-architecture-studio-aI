@@ -3,10 +3,8 @@ import 'server-only';
 /**
  * Email provider abstraction (research R5, FR-003/FR-004).
  *
- * EMAIL_PROVIDER selects the transport:
- *  - 'smtp' / 'mailtrap' — transactional delivery via Mailtrap / Nodemailer SMTP.
- *  - 'resend' — transactional delivery via the Resend API (RESEND_API_KEY).
- *  - 'dev' — fallback dev transport.
+ * Primary transport: Mailtrap Nodemailer SMTP.
+ * Fallbacks: Resend API or Dev console logger.
  */
 
 export interface EmailMessage {
@@ -41,6 +39,7 @@ async function sendViaSmtp(msg: EmailMessage): Promise<SendResult> {
   const transporter = nodemailer.createTransport({
     host,
     port,
+    secure: false,
     auth: { user, pass },
   });
 
@@ -72,25 +71,19 @@ function sendViaDev(msg: EmailMessage): SendResult {
 }
 
 export async function sendEmail(msg: EmailMessage): Promise<SendResult> {
-  const provider = process.env.EMAIL_PROVIDER ?? 'smtp';
-
-  if (provider === 'smtp' || provider === 'mailtrap' || process.env.SMTP_USER || !process.env.RESEND_API_KEY) {
-    try {
-      return await sendViaSmtp(msg);
-    } catch (err) {
-      console.error('[email] SMTP delivery failed:', err);
-      if (process.env.RESEND_API_KEY) {
-        return sendViaResend(msg);
-      }
-      return sendViaDev(msg);
-    }
-  }
-
-  if (provider === 'resend' && process.env.RESEND_API_KEY) {
+  if (process.env.EMAIL_PROVIDER === 'resend' && process.env.RESEND_API_KEY) {
     return sendViaResend(msg);
   }
 
-  return sendViaDev(msg);
+  try {
+    return await sendViaSmtp(msg);
+  } catch (err) {
+    console.error('[email] SMTP delivery failed:', err);
+    if (process.env.RESEND_API_KEY) {
+      return sendViaResend(msg);
+    }
+    return sendViaDev(msg);
+  }
 }
 
 function layout(title: string, body: string, actionUrl: string, actionLabel: string): string {
