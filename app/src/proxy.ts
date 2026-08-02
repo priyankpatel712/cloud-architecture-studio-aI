@@ -18,6 +18,12 @@ export async function proxy(req: NextRequest) {
   // Let API routes handle their own auth (they return JSON, not redirects).
   if (pathname.startsWith('/api')) return NextResponse.next();
 
+  if (pathname === '/logout') {
+    const res = NextResponse.redirect(new URL('/login', req.url));
+    res.cookies.set(SESSION_COOKIE, '', { path: '/', maxAge: 0 });
+    return res;
+  }
+
   const token = req.cookies.get(SESSION_COOKIE)?.value;
   const session = token ? await verifySession(token) : null;
   const isAuthPage = AUTH_PAGES.includes(pathname);
