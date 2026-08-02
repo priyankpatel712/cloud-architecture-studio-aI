@@ -1,0 +1,153 @@
+
+> app@0.1.0 dev
+> next dev
+
+▲ Next.js 16.2.10 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.1.9:3000
+- Environments: .env.local
+✓ Ready in 1522ms
+
+ GET /studio?project=6a6df32bd4d7ee483abb7829 200 in 3.3s (next.js: 1028ms, proxy.ts: 918ms, application-code: 1396ms)
+ GET /api/auth/me 200 in 1524ms (next.js: 1319ms, proxy.ts: 19ms, application-code: 186ms)
+ POST /api/auth/login 200 in 259ms (next.js: 90ms, proxy.ts: 10ms, application-code: 159ms)
+[llm] groq unavailable (The assistant is rate-limited right now — try again shortly.) — trying huggingface
+[llm] provider 402 error body: {"error":"You have depleted your monthly included credits. Purchase pre-paid credits to continue using Inference Providers. Alternatively, subscribe to PRO to get 20x more included usage."}
+[llm] fallback huggingface/meta-llama/Llama-3.3-70B-Instruct is misconfigured (LLM request failed (402). Add credits to the provider account or switch providers in Settings → AI Provider.) — skipping it for this turn
+[llm] huggingface unavailable (LLM request failed (402). Add credits to the provider account or switch providers in Settings → AI Provider.) — trying nvidia
+[llm] answered via fallback nvidia/nvidia/llama-3.3-nemotron-super-49b-v1 (groq unavailable)
+ GET /api/projects/6a6df32bd4d7ee483abb7829/report?reportType=walkthrough 200 in 38.5s (next.js: 1866ms, proxy.ts: 10ms, application-code: 36.6s)
+ GET /api/projects/6a6df32bd4d7ee483abb7829/report?reportType=walkthrough 200 in 62ms (next.js: 23ms, proxy.ts: 6ms, application-code: 34ms)
+ GET /api/projects/6a6df32bd4d7ee483abb7829/export?format=report&reportType=walkthrough 200 in 1674ms (next.js: 1630ms, proxy.ts: 5ms, application-code: 39ms)
+ GET /api/projects/6a6df32bd4d7ee483abb7829/chat 200 in 2.4s (next.js: 2.3s, proxy.ts: 9ms, application-code: 49ms)
+ GET /api/projects/6a6df32bd4d7ee483abb7829/architecture 200 in 3.2s (next.js: 3.1s, proxy.ts: 12ms, application-code: 82ms)
+ POST /api/pricing 200 in 130ms (next.js: 99ms, proxy.ts: 10ms, application-code: 22ms)
+ GET /api/projects/6a6df32bd4d7ee483abb7829/export?format=report&reportType=walkthrough 200 in 70ms (next.js: 23ms, proxy.ts: 7ms, application-code: 40ms)
+ GET /api/projects/6a6df32bd4d7ee483abb7829/report?reportType=walkthrough 200 in 55ms (next.js: 20ms, proxy.ts: 7ms, application-code: 28ms)
+[browser] Please use `getNodesBounds` from `useReactFlow`/`useSvelteFlow` hook to ensure correct values for sub flows. If not possible, you have to provide a nodeLookup to support sub flows. (src/app/(dashboard)
+ GET /connections 200 in 2.1s (next.js: 2.0s, proxy.ts: 8ms, application-code: 80ms)
+ GET /api/connections 200 in 719ms (next.js: 581ms, proxy.ts: 22ms, application-code: 116ms)
+ GET /api/connections 200 in 101ms (next.js: 17ms, proxy.ts: 47ms, application-code: 36ms)
+ GET /settings 200 in 1159ms (next.js: 1111ms, proxy.ts: 6ms, application-code: 42ms)
+ GET /api/auth/me 200 in 71ms (next.js: 15ms, proxy.ts: 26ms, application-code: 31ms)
+ GET /api/auth/me 200 in 51ms (next.js: 11ms, proxy.ts: 19ms, application-code: 21ms)
+ GET /api/settings/knowledge 200 in 666ms (next.js: 512ms, proxy.ts: 16ms, application-code: 138ms)
+ GET /api/settings/llm 200 in 673ms (next.js: 582ms, proxy.ts: 17ms, application-code: 75ms)
+ GET /api/settings/llm 200 in 64ms (next.js: 20ms, proxy.ts: 31ms, application-code: 13ms)
+ GET /api/settings/knowledge 200 in 79ms (next.js: 31ms, proxy.ts: 17ms, application-code: 31ms)
+ GET /api/settings/llm 200 in 31ms (next.js: 5ms, proxy.ts: 10ms, application-code: 16ms)
+ GET /api/settings/llm 200 in 35ms (next.js: 10ms, proxy.ts: 9ms, application-code: 16ms)
+ POST /api/settings/llm/models 200 in 2.3s (next.js: 573ms, proxy.ts: 15ms, application-code: 1714ms)
+ GET / 200 in 116ms (next.js: 80ms, proxy.ts: 6ms, application-code: 30ms)
+ GET /api/connections 200 in 291ms (next.js: 17ms, proxy.ts: 36ms, application-code: 238ms)
+ GET /api/auth/me 200 in 310ms (next.js: 236ms, proxy.ts: 33ms, application-code: 41ms)
+ GET /api/projects 200 in 349ms (next.js: 228ms, proxy.ts: 35ms, application-code: 85ms)
+ GET /api/connections 200 in 123ms (next.js: 24ms, proxy.ts: 54ms, application-code: 44ms)
+ GET /api/auth/me 200 in 129ms (next.js: 29ms, proxy.ts: 29ms, application-code: 71ms)
+ GET /api/projects 200 in 148ms (next.js: 38ms, proxy.ts: 28ms, application-code: 82ms)
+ GET /projects 200 in 108ms (next.js: 70ms, proxy.ts: 5ms, application-code: 33ms)
+ GET /api/projects 200 in 44ms (next.js: 5ms, proxy.ts: 13ms, application-code: 26ms)
+ GET /studio 200 in 36ms (next.js: 6ms, proxy.ts: 4ms, application-code: 25ms)
+ GET /projects 200 in 34ms (next.js: 5ms, proxy.ts: 5ms, application-code: 24ms)
+ GET /api/projects 200 in 62ms (next.js: 7ms, proxy.ts: 10ms, application-code: 45ms)
+ GET /projects/new 200 in 117ms (next.js: 78ms, proxy.ts: 7ms, application-code: 32ms)
+ POST /api/chat/start 201 in 141ms (next.js: 108ms, proxy.ts: 9ms, application-code: 25ms)
+ POST /api/projects/6a6e3dcfcb53362e80b533fc/chat/messages 200 in 2.7min (next.js: 3.1s, proxy.ts: 4ms, application-code: 2.7min)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 34ms (next.js: 4ms, proxy.ts: 5ms, application-code: 24ms)
+ GET /api/projects/6a6e3dcfcb53362e80b533fc/chat 200 in 70ms (next.js: 31ms, proxy.ts: 10ms, application-code: 29ms)
+ GET /api/projects/6a6e3dcfcb53362e80b533fc/chat 200 in 59ms (next.js: 8ms, proxy.ts: 7ms, application-code: 44ms)
+ GET /api/projects/6a6e3dcfcb53362e80b533fc/architecture 200 in 72ms (next.js: 28ms, proxy.ts: 8ms, application-code: 36ms)
+ POST /api/pricing 200 in 29ms (next.js: 5ms, proxy.ts: 5ms, application-code: 19ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 732ms (next.js: 236ms, proxy.ts: 295ms, application-code: 200ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 527ms (next.js: 9ms, proxy.ts: 10ms, application-code: 508ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 440ms (next.js: 27ms, proxy.ts: 56ms, application-code: 357ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 439ms (next.js: 118ms, proxy.ts: 55ms, application-code: 267ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 439ms (next.js: 181ms, proxy.ts: 54ms, application-code: 204ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 503ms (next.js: 232ms, proxy.ts: 55ms, application-code: 216ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 487ms (next.js: 276ms, proxy.ts: 40ms, application-code: 171ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 491ms (next.js: 16ms, proxy.ts: 16ms, application-code: 460ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 424ms (next.js: 25ms, proxy.ts: 55ms, application-code: 345ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 421ms (next.js: 98ms, proxy.ts: 50ms, application-code: 272ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 422ms (next.js: 167ms, proxy.ts: 49ms, application-code: 206ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 419ms (next.js: 220ms, proxy.ts: 39ms, application-code: 160ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 511ms (next.js: 268ms, proxy.ts: 33ms, application-code: 209ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 591ms (next.js: 36ms, proxy.ts: 14ms, application-code: 541ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 562ms (next.js: 35ms, proxy.ts: 140ms, application-code: 388ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 562ms (next.js: 131ms, proxy.ts: 141ms, application-code: 289ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 481ms (next.js: 204ms, proxy.ts: 66ms, application-code: 211ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 455ms (next.js: 303ms, proxy.ts: 47ms, application-code: 104ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 304ms (next.js: 127ms, proxy.ts: 104ms, application-code: 74ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 253ms (next.js: 98ms, proxy.ts: 104ms, application-code: 51ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 282ms (next.js: 123ms, proxy.ts: 108ms, application-code: 52ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 466ms (next.js: 183ms, proxy.ts: 165ms, application-code: 118ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 760ms (next.js: 373ms, proxy.ts: 291ms, application-code: 96ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 737ms (next.js: 283ms, proxy.ts: 322ms, application-code: 133ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 932ms (next.js: 310ms, proxy.ts: 308ms, application-code: 315ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 699ms (next.js: 287ms, proxy.ts: 241ms, application-code: 170ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 868ms (next.js: 324ms, proxy.ts: 287ms, application-code: 257ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 569ms (next.js: 320ms, proxy.ts: 198ms, application-code: 52ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 275ms (next.js: 116ms, proxy.ts: 116ms, application-code: 43ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 299ms (next.js: 118ms, proxy.ts: 88ms, application-code: 93ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 188ms (next.js: 18ms, proxy.ts: 23ms, application-code: 147ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 156ms (next.js: 7ms, proxy.ts: 8ms, application-code: 142ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 107ms (next.js: 10ms, proxy.ts: 20ms, application-code: 77ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 106ms (next.js: 47ms, proxy.ts: 20ms, application-code: 40ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 866ms (next.js: 421ms, proxy.ts: 298ms, application-code: 147ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 727ms (next.js: 306ms, proxy.ts: 266ms, application-code: 154ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 432ms (next.js: 241ms, proxy.ts: 139ms, application-code: 52ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 830ms (next.js: 302ms, proxy.ts: 311ms, application-code: 217ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 521ms (next.js: 322ms, proxy.ts: 120ms, application-code: 79ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 875ms (next.js: 515ms, proxy.ts: 260ms, application-code: 100ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 444ms (next.js: 191ms, proxy.ts: 169ms, application-code: 84ms)
+✓ Compiled in 383ms
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 608ms (next.js: 214ms, proxy.ts: 228ms, application-code: 165ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 79ms (next.js: 8ms, proxy.ts: 14ms, application-code: 57ms)
+✓ Compiled in 851ms
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 678ms (next.js: 353ms, proxy.ts: 185ms, application-code: 140ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 463ms (next.js: 166ms, proxy.ts: 127ms, application-code: 170ms)
+✓ Compiled in 406ms
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 1038ms (next.js: 471ms, proxy.ts: 346ms, application-code: 220ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 101ms (next.js: 10ms, proxy.ts: 15ms, application-code: 75ms)
+✓ Compiled in 789ms
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 781ms (next.js: 250ms, proxy.ts: 298ms, application-code: 233ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 86ms (next.js: 9ms, proxy.ts: 14ms, application-code: 64ms)
+✓ Compiled in 676ms
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 1189ms (next.js: 554ms, proxy.ts: 340ms, application-code: 295ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 140ms (next.js: 15ms, proxy.ts: 18ms, application-code: 107ms)
+✓ Compiled in 430ms
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 1889ms (next.js: 678ms, proxy.ts: 750ms, application-code: 462ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 272ms (next.js: 25ms, proxy.ts: 51ms, application-code: 195ms)
+✓ Compiled in 207ms
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 401ms (next.js: 173ms, proxy.ts: 127ms, application-code: 100ms)
+✓ Compiled in 254ms
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 538ms (next.js: 286ms, proxy.ts: 148ms, application-code: 104ms)
+✓ Compiled in 190ms
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 323ms (next.js: 143ms, proxy.ts: 92ms, application-code: 88ms)
+✓ Compiled in 232ms
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 573ms (next.js: 295ms, proxy.ts: 167ms, application-code: 110ms)
+✓ Compiled in 335ms
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 714ms (next.js: 364ms, proxy.ts: 199ms, application-code: 151ms)
+✓ Compiled in 192ms
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 638ms (next.js: 174ms, proxy.ts: 202ms, application-code: 262ms)
+ GET /api/projects/6a6e3dcfcb53362e80b533fc/chat 200 in 448ms (next.js: 143ms, proxy.ts: 255ms, application-code: 50ms)
+✓ Compiled in 175ms
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 429ms (next.js: 166ms, proxy.ts: 104ms, application-code: 159ms)
+✓ Compiled in 183ms
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 319ms (next.js: 146ms, proxy.ts: 108ms, application-code: 64ms)
+✓ Compiled in 357ms
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 550ms (next.js: 274ms, proxy.ts: 175ms, application-code: 101ms)
+✓ Compiled in 286ms
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 413ms (next.js: 175ms, proxy.ts: 133ms, application-code: 106ms)
+✓ Compiled in 326ms
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 533ms (next.js: 215ms, proxy.ts: 178ms, application-code: 140ms)
+✓ Compiled in 242ms
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 380ms (next.js: 174ms, proxy.ts: 117ms, application-code: 89ms)
+✓ Compiled in 360ms
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 811ms (next.js: 394ms, proxy.ts: 268ms, application-code: 149ms)
+✓ Compiled in 200ms
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 469ms (next.js: 255ms, proxy.ts: 124ms, application-code: 90ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 137ms (next.js: 32ms, proxy.ts: 12ms, application-code: 93ms)
+✓ Compiled in 252ms
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 370ms (next.js: 165ms, proxy.ts: 137ms, application-code: 68ms)
+ GET /studio?project=6a6e3dcfcb53362e80b533fc 200 in 1001ms (next.js: 574ms, proxy.ts: 276ms, application-code: 151ms)
+[?25h

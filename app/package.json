@@ -1,0 +1,52 @@
+{
+  "name": "app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "test": "vitest run",
+    "seed": "node scripts/seed.mjs",
+    "seed:knowledge": "tsx --tsconfig scripts/tsconfig.json --env-file=.env.local scripts/seed-knowledge.mjs",
+    "baseline": "tsx --tsconfig scripts/tsconfig.json --env-file=.env.local scripts/measure-baseline.mjs",
+    "models:check": "tsx --tsconfig scripts/tsconfig.json --env-file=.env.local scripts/check-models.mjs",
+    "mcp:doctor": "tsx --tsconfig scripts/tsconfig.json --env-file=.env.local scripts/mcp-doctor.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.110.0",
+    "@aws-sdk/client-pricing": "^3.1079.0",
+    "@aws-sdk/client-sso": "^3.1079.0",
+    "@aws-sdk/client-sso-oidc": "^3.1079.0",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@xyflow/react": "^12.11.1",
+    "bcryptjs": "^3.0.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "elkjs": "^0.11.1",
+    "html-to-image": "^1.11.13",
+    "jose": "^6.2.3",
+    "jspdf": "^4.2.1",
+    "lucide-react": "^1.23.0",
+    "mongoose": "^9.7.3",
+    "next": "16.2.10",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "resend": "^6.17.1",
+    "tailwind-merge": "^3.6.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.10",
+    "tailwindcss": "^4",
+    "tsx": "^4.23.1",
+    "typescript": "^5",
+    "vitest": "^4.1.10"
+  }
+}

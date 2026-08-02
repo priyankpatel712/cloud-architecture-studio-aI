@@ -1,0 +1,140 @@
+@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-on-secondary-container: #5e6472;
+  --color-outline: #727785;
+  --color-secondary-fixed: #dde2f3;
+  --color-surface-container-highest: #e0e2e8;
+  --color-surface-tint: #005bc0;
+  --color-outline-variant: #c1c6d6;
+  --color-on-primary: #ffffff;
+  --color-tertiary: #9e4300;
+  --color-error: #ba1a1a;
+  --color-surface-dim: #d8dae0;
+  --color-on-secondary-fixed-variant: #414754;
+  --color-text-primary: #181c20;
+  --color-on-secondary-fixed: #161c27;
+  --color-on-error-container: #93000a;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-fixed: #ffdbcb;
+  --color-success-green: #1e8e3e;
+  --color-primary-container: #1a73e8;
+  --color-surface-container-lowest: #ffffff;
+  --color-on-error: #ffffff;
+  --color-inverse-primary: #adc7ff;
+  --color-error-red: #d93025;
+  --color-inverse-surface: #2d3135;
+  --color-tertiary-container: #c55500;
+  --color-tertiary-fixed-dim: #ffb691;
+  --color-on-secondary: #ffffff;
+  --color-surface-container-low: #f1f3f9;
+  --color-surface-container: #eceef4;
+  --color-on-primary-fixed: #001a41;
+  --color-surface-bright: #f7f9ff;
+  --color-error-container: #ffdad6;
+  --color-secondary-fixed-dim: #c1c6d6;
+  --color-on-tertiary-container: #0e0200;
+  --color-on-primary-fixed-variant: #004493;
+  --color-inverse-on-surface: #eff1f7;
+  --color-primary: #005bbf;
+  --color-surface-container-high: #e6e8ee;
+  --color-surface-variant: #e0e2e8;
+  --color-primary-fixed: #d8e2ff;
+  --color-on-primary-container: #ffffff;
+  --color-on-surface-variant: #414754;
+  --color-primary-fixed-dim: #adc7ff;
+  --color-background: #f7f9ff;
+  --color-secondary-container: #dde2f3;
+  --color-on-background: #181c20;
+  --color-border-subtle: #dadce0;
+  --color-secondary: #585e6c;
+  --color-on-tertiary-fixed-variant: #783100;
+  --color-surface: #ffffff;
+  --color-on-tertiary-fixed: #341100;
+  --color-text-secondary: #414754;
+  --color-on-surface: #181c20;
+  
+  --spacing-component-gap: 12px;
+  --spacing-nav-rail-width: 72px;
+  --spacing-gutter: 24px;
+  --spacing-side-panel-width: 240px;
+  --spacing-margin-desktop: 32px;
+  --spacing-margin-mobile: 16px;
+
+  --font-body-sm: 'Inter', sans-serif;
+  --font-body-lg: 'Inter', sans-serif;
+  --font-display-lg: 'Hanken Grotesk', sans-serif;
+  --font-headline-md: 'Hanken Grotesk', sans-serif;
+  --font-headline-lg: 'Hanken Grotesk', sans-serif;
+  --font-body-md: 'Inter', sans-serif;
+  --font-label-md: 'Inter', sans-serif;
+  --font-headline-sm: 'Hanken Grotesk', sans-serif;
+  --font-code-md: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', monospace;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', monospace;
+}
+
+:root {
+  --background: var(--color-background);
+  --foreground: var(--color-on-surface);
+}
+
+/* NOTE: keep resets inside @layer base — unlayered rules override Tailwind's
+   layered utilities (p-*, m-*, …) regardless of specificity. */
+@layer base {
+  html, body {
+    height: 100%;
+    font-family: var(--font-body-md);
+    background: var(--background);
+    color: var(--foreground);
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+.scrollbar-none::-webkit-scrollbar { display: none; }
+.scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 24px;
+}
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #dadce0;
+  border-radius: 10px;
+}
+
+/* Blueprint grid — the signature surface of the Studio canvas */
+.blueprint-grid {
+  background-color: var(--color-surface-container-low);
+  background-image:
+    linear-gradient(var(--color-outline-variant) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-outline-variant) 1px, transparent 1px);
+  background-size: 24px 24px;
+  background-position: -1px -1px;
+}
+
+.font-mono, .tabular {
+  font-family: var(--font-mono);
+  font-feature-settings: 'tnum' 1;
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+.animate-rise { animation: rise 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
