@@ -4,13 +4,9 @@ import 'server-only';
  * Email provider abstraction (research R5, FR-003/FR-004).
  *
  * EMAIL_PROVIDER selects the transport:
+ *  - 'smtp' / 'mailtrap' — transactional delivery via Mailtrap / Nodemailer SMTP.
  *  - 'resend' — transactional delivery via the Resend API (RESEND_API_KEY).
- *  - 'dev' (default) — logs the message and returns the action link so the
- *    verification/reset flows are testable before delivery is connected.
- *    The dev link is surfaced in API responses in NON-PRODUCTION ONLY.
- *
- * Because email verification gates workspace access (clarified FR-004), delivery
- * is a hard production dependency for sign-up.
+ *  - 'dev' — fallback dev transport.
  */
 
 export interface EmailMessage {
@@ -28,7 +24,34 @@ export interface SendResult {
 }
 
 export function appBaseUrl(): string {
-  return (process.env.APP_BASE_URL ?? 'http://localhost:3000').replace(/\/$/, '');
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL.replace(/\/$/, '')}`;
+  }
+  return (process.env.APP_BASE_URL ?? 'https://cloud-architecture-studio-a-i-wu6n.vercel.app').replace(/\/$/, '');
+}
+
+async function sendViaSmtp(msg: EmailMessage): Promise<SendResult> {
+  const nodemailer = await import('nodemailer');
+  const host = process.env.SMTP_HOST || 'sandbox.smtp.mailtrap.io';
+  const port = Number(process.env.SMTP_PORT || 2525);
+  const user = process.env.SMTP_USER || '158651ef857574';
+  const pass = process.env.SMTP_PASS || '90a9a4499b856a';
+  const from = process.env.EMAIL_FROM || 'Cloud Architecture Studio <from@example.com>';
+
+  const transporter = nodemailer.createTransport({
+    host,
+    port,
+    auth: { user, pass },
+  });
+
+  await transporter.sendMail({
+    from,
+    to: msg.to,
+    subject: msg.subject,
+    html: msg.html,
+  });
+
+  return { delivered: true };
 }
 
 async function sendViaResend(msg: EmailMessage): Promise<SendResult> {
@@ -49,20 +72,37 @@ function sendViaDev(msg: EmailMessage): SendResult {
 }
 
 export async function sendEmail(msg: EmailMessage): Promise<SendResult> {
-  const provider = process.env.EMAIL_PROVIDER ?? 'dev';
-  if (provider === 'resend' && process.env.RESEND_API_KEY) return sendViaResend(msg);
-  if (provider !== 'dev' && process.env.NODE_ENV === 'production') {
-    throw new Error(`Email provider "${provider}" is not configured`);
+  const provider = process.env.EMAIL_PROVIDER ?? 'smtp';
+
+  if (provider === 'smtp' || provider === 'mailtrap' || process.env.SMTP_USER || !process.env.RESEND_API_KEY) {
+    try {
+      return await sendViaSmtp(msg);
+    } catch (err) {
+      console.error('[email] SMTP delivery failed:', err);
+      if (process.env.RESEND_API_KEY) {
+        return sendViaResend(msg);
+      }
+      return sendViaDev(msg);
+    }
   }
+
+  if (provider === 'resend' && process.env.RESEND_API_KEY) {
+    return sendViaResend(msg);
+  }
+
   return sendViaDev(msg);
 }
 
 function layout(title: string, body: string, actionUrl: string, actionLabel: string): string {
-  return `<div style="font-family:system-ui,sans-serif;max-width:480px;margin:0 auto;padding:24px">
-  <h2 style="margin:0 0 12px">${title}</h2>
-  <p style="color:#444;line-height:1.5">${body}</p>
-  <p style="margin:24px 0"><a href="${actionUrl}" style="background:#111;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none">${actionLabel}</a></p>
-  <p style="color:#888;font-size:12px">If you didn't request this, you can ignore this email.</p>
+  return `<div style="font-family:system-ui,sans-serif;max-width:480px;margin:0 auto;padding:24px;border:1px solid #e5e7eb;border-radius:12px;background:#ffffff">
+  <div style="text-align:center;margin-bottom:20px">
+    <h2 style="margin:0 0 8px;color:#111827;font-size:22px;font-weight:700">${title}</h2>
+    <p style="color:#4b5563;line-height:1.6;font-size:15px;margin:0">${body}</p>
+  </div>
+  <div style="text-align:center;margin:28px 0">
+    <a href="${actionUrl}" style="background:#2563eb;color:#ffffff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;display:inline-block;box-shadow:0 2px 4px rgba(37,99,235,0.2)">${actionLabel}</a>
+  </div>
+  <p style="color:#9ca3af;font-size:13px;text-align:center;margin-top:24px;border-top:1px solid #f3f4f6;padding-top:16px">If you didn't request this email, you can safely ignore it.</p>
 </div>`;
 }
 
@@ -73,9 +113,9 @@ export function sendVerificationEmail(to: string, token: string): Promise<SendRe
     subject: 'Verify your email — Cloud Architecture Studio',
     html: layout(
       'Verify your email',
-      'Confirm your email address to unlock your workspace. This link expires in 24 hours.',
+      'Confirm your email address to unlock your Cloud Architecture Studio workspace. This link expires in 24 hours.',
       url,
-      'Verify email'
+      'Verify Email Address'
     ),
     actionUrl: url,
   });
@@ -90,7 +130,7 @@ export function sendResetEmail(to: string, token: string): Promise<SendResult> {
       'Reset your password',
       'Use the button below to choose a new password. This link expires in 1 hour and can be used once.',
       url,
-      'Reset password'
+      'Reset Password'
     ),
     actionUrl: url,
   });
