@@ -1,0 +1,24 @@
+# --- Required Platform API Keys ---
+vercel_api_token        = "vca_xxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+mongodbatlas_public_key  = "abcdefgh"
+mongodbatlas_private_key = "12345678-abcd-1234-abcd-1234567890ab"
+mongodbatlas_org_id      = "60a1b2c3d4e5f67890123456"
+
+# --- GitHub Repository Link ---
+github_repo             = "your-username/cloud-architecture-studio-aI"
+
+# --- Optional Custom DB Credentials (Random password generated if blank) ---
+mongodb_username        = "cas_admin"
+mongodb_password        = ""
+
+# --- Optional Application Secrets (Generated automatically if left blank) ---
+auth_secret             = ""
+encryption_key          = ""
+
+# --- AI Provider API Keys ---
+llm_provider            = "nvidia" # groq | nvidia | gemini | openrouter
+nvidia_api_key          = "nvapi-xxxxxxxxxxxxxxxxxxxxxxxx"
+groq_api_key            = ""
+gemini_api_key          = ""
+openrouter_api_key      = ""
+resend_api_key          = ""

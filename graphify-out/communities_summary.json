@@ -1,0 +1,1069 @@
+[
+  {
+    "community_id": 0,
+    "size": 136,
+    "top_nodes": [
+      "app_src_app_api_auth_forgot_route",
+      "app_src_app_api_auth_forgot_route_post",
+      "app_src_app_api_auth_login_route",
+      "app_src_app_api_auth_login_route_post",
+      "app_src_app_api_auth_me_route",
+      "app_src_app_api_auth_me_route_get",
+      "app_src_app_api_auth_me_route_patch",
+      "app_src_app_api_auth_me_route_serializeme",
+      "app_src_app_api_auth_register_route",
+      "app_src_app_api_auth_register_route_post"
+    ]
+  },
+  {
+    "community_id": 1,
+    "size": 53,
+    "top_nodes": [
+      "app_package_dependencies_jspdf",
+      "app_src_app_api_projects_id_export_route",
+      "app_src_app_api_projects_id_export_route_format",
+      "app_src_app_api_projects_id_export_route_formats",
+      "app_src_app_api_projects_id_export_route_get",
+      "app_src_app_dashboard_studio_page",
+      "app_src_app_dashboard_studio_page_apidocument",
+      "app_src_app_dashboard_studio_page_studioinner",
+      "app_src_app_dashboard_studio_page_studiopage",
+      "app_src_app_dashboard_studio_page_toarchdocument"
+    ]
+  },
+  {
+    "community_id": 2,
+    "size": 53,
+    "top_nodes": [
+      "app_src_app_admin_layout",
+      "app_src_app_admin_layout_adminlayout",
+      "app_src_app_admin_page",
+      "app_src_app_admin_page_adminoverview",
+      "app_src_app_admin_roles_page",
+      "app_src_app_admin_roles_page_caps",
+      "app_src_app_admin_roles_page_role_icon",
+      "app_src_app_admin_roles_page_rolespage",
+      "app_src_app_admin_users_page",
+      "app_src_app_admin_users_page_userspage"
+    ]
+  },
+  {
+    "community_id": 3,
+    "size": 42,
+    "top_nodes": [
+      "app_package",
+      "app_package_dependencies",
+      "app_package_dependencies_anthropic_ai_sdk",
+      "app_package_dependencies_aws_sdk_client_pricing",
+      "app_package_dependencies_aws_sdk_client_sso",
+      "app_package_dependencies_aws_sdk_client_sso_oidc",
+      "app_package_dependencies_bcryptjs",
+      "app_package_dependencies_class_variance_authority",
+      "app_package_dependencies_clsx",
+      "app_package_dependencies_elkjs"
+    ]
+  },
+  {
+    "community_id": 4,
+    "size": 27,
+    "top_nodes": [
+      "app_src_app_dashboard_projects_new_page",
+      "app_src_app_dashboard_projects_new_page_examples",
+      "app_src_app_dashboard_projects_new_page_newprojectpage",
+      "app_src_app_dashboard_projects_new_page_providertoggle",
+      "app_src_app_dashboard_projects_new_page_steps",
+      "app_src_components_studio_canvas_iconbutton",
+      "app_src_components_studio_chatpanel",
+      "app_src_components_studio_chatpanel_chatarchitecture",
+      "app_src_components_studio_chatpanel_chatmcpcall",
+      "app_src_components_studio_chatpanel_chatmessage"
+    ]
+  },
+  {
+    "community_id": 5,
+    "size": 26,
+    "top_nodes": [
+      ".agents/skills/speckit-analyze/SKILL.md",
+      ".agents/skills/speckit-analyze/SKILL.md#1.-initialize-analysis-context",
+      ".agents/skills/speckit-analyze/SKILL.md#2.-load-artifacts-(progressive-disclosure)",
+      ".agents/skills/speckit-analyze/SKILL.md#3.-build-semantic-models",
+      ".agents/skills/speckit-analyze/SKILL.md#4.-detection-passes-(token-efficient-analysis)",
+      ".agents/skills/speckit-analyze/SKILL.md#5.-severity-assignment",
+      ".agents/skills/speckit-analyze/SKILL.md#6.-produce-compact-analysis-report",
+      ".agents/skills/speckit-analyze/SKILL.md#7.-provide-next-actions",
+      ".agents/skills/speckit-analyze/SKILL.md#8.-offer-remediation",
+      ".agents/skills/speckit-analyze/SKILL.md#9.-check-for-extension-hooks"
+    ]
+  },
+  {
+    "community_id": 6,
+    "size": 26,
+    "top_nodes": [
+      "app_src_app_api_projects_id_chat_messages_route",
+      "app_src_lib_generate_orchestrator",
+      "app_src_lib_generate_orchestrator_archannotation",
+      "app_src_lib_generate_orchestrator_archcontainer",
+      "app_src_lib_generate_orchestrator_archedge",
+      "app_src_lib_generate_orchestrator_architectureprompt",
+      "app_src_lib_generate_orchestrator_archnode",
+      "app_src_lib_generate_orchestrator_catalogprompt",
+      "app_src_lib_generate_orchestrator_containertypeprompt",
+      "app_src_lib_generate_orchestrator_guidance"
+    ]
+  },
+  {
+    "community_id": 7,
+    "size": 23,
+    "top_nodes": [
+      "app_src_app_dashboard_page",
+      "app_src_app_dashboard_page_apiproject",
+      "app_src_app_dashboard_page_connectionview",
+      "app_src_app_dashboard_page_dashboard",
+      "app_src_app_dashboard_page_expiresin",
+      "app_src_app_dashboard_page_relativetime",
+      "app_src_app_dashboard_projects_page",
+      "app_src_app_dashboard_projects_page_apiproject",
+      "app_src_app_dashboard_projects_page_filter",
+      "app_src_app_dashboard_projects_page_filters"
+    ]
+  },
+  {
+    "community_id": 8,
+    "size": 23,
+    "top_nodes": [
+      "specs/001-mvp-baseline/contracts/README.md",
+      "specs/001-mvp-baseline/contracts/README.md#already-built-(documented-for-completeness)",
+      "specs/001-mvp-baseline/contracts/README.md#api-contracts-—-cloud-architecture-studio-ai-mvp",
+      "specs/001-mvp-baseline/contracts/README.md#new-for-this-feature",
+      "specs/001-mvp-baseline/contracts/generation.md",
+      "specs/001-mvp-baseline/contracts/generation.md#`get-/api/projects/[id]/chat`",
+      "specs/001-mvp-baseline/contracts/generation.md#`post-/api/chat/start`",
+      "specs/001-mvp-baseline/contracts/generation.md#`post-/api/projects/[id]/chat/messages`",
+      "specs/001-mvp-baseline/contracts/generation.md#contract:-conversational-architecture-generation-(fr-014,-fr-014a–d,-fr-015,-fr-016a)",
+      "specs/001-mvp-baseline/contracts/generation.md#direct-edit-context-sync-(fr-016a;-us2/ac4)"
+    ]
+  },
+  {
+    "community_id": 9,
+    "size": 22,
+    "top_nodes": [
+      "app_src_components_studio_canvas",
+      "app_src_components_studio_canvas_canvasimpl",
+      "app_src_components_studio_canvas_cloneedge",
+      "app_src_components_studio_canvas_clonenode",
+      "app_src_components_studio_canvas_divider",
+      "app_src_components_studio_canvas_edgetypes",
+      "app_src_components_studio_canvas_fallbacksize",
+      "app_src_components_studio_canvas_iseditabletarget",
+      "app_src_components_studio_canvas_motionduration",
+      "app_src_components_studio_canvas_nodebox"
+    ]
+  },
+  {
+    "community_id": 10,
+    "size": 21,
+    "top_nodes": [
+      "app_src_components_studio_annotationnode",
+      "app_src_components_studio_annotationnode_annotationnode",
+      "app_src_components_studio_annotationnode_annotationnodeextra",
+      "app_src_components_studio_annotationnode_annotationnodeimpl",
+      "app_src_lib_canvas_model",
+      "app_src_lib_canvas_model_annotation_colors",
+      "app_src_lib_canvas_model_annotationcolor",
+      "app_src_lib_canvas_model_annotationnodedata",
+      "app_src_lib_canvas_model_canvasnodetype",
+      "app_src_lib_canvas_model_docannotation"
+    ]
+  },
+  {
+    "community_id": 11,
+    "size": 21,
+    "top_nodes": [
+      "app_src_components_studio_orthogonaledge",
+      "app_src_components_studio_orthogonaledge_orthogonaledge",
+      "app_src_components_studio_orthogonaledge_orthogonaledgeimpl",
+      "app_src_components_studio_orthogonaledge_positiontoside",
+      "app_src_lib_canvas_model_default_edge_style",
+      "app_src_lib_canvas_model_edge_colors",
+      "app_src_lib_canvas_model_orthogonaledgedata",
+      "app_src_lib_canvas_routing",
+      "app_src_lib_canvas_routing_elbowcandidates",
+      "app_src_lib_canvas_routing_inflate"
+    ]
+  },
+  {
+    "community_id": 12,
+    "size": 20,
+    "top_nodes": [
+      "app_tsconfig",
+      "app_tsconfig_compileroptions",
+      "app_tsconfig_compileroptions_allowjs",
+      "app_tsconfig_compileroptions_esmoduleinterop",
+      "app_tsconfig_compileroptions_incremental",
+      "app_tsconfig_compileroptions_isolatedmodules",
+      "app_tsconfig_compileroptions_jsx",
+      "app_tsconfig_compileroptions_lib",
+      "app_tsconfig_compileroptions_module",
+      "app_tsconfig_compileroptions_moduleresolution"
+    ]
+  },
+  {
+    "community_id": 13,
+    "size": 20,
+    "top_nodes": [
+      "specs/001-mvp-baseline/spec.md",
+      "specs/001-mvp-baseline/spec.md#assumptions",
+      "specs/001-mvp-baseline/spec.md#clarifications",
+      "specs/001-mvp-baseline/spec.md#edge-cases",
+      "specs/001-mvp-baseline/spec.md#feature-specification:-cloud-architecture-studio-ai-—-mvp",
+      "specs/001-mvp-baseline/spec.md#functional-requirements",
+      "specs/001-mvp-baseline/spec.md#key-entities-*(include-if-feature-involves-data)*",
+      "specs/001-mvp-baseline/spec.md#measurable-outcomes",
+      "specs/001-mvp-baseline/spec.md#overview",
+      "specs/001-mvp-baseline/spec.md#requirements-*(mandatory)*"
+    ]
+  },
+  {
+    "community_id": 14,
+    "size": 19,
+    "top_nodes": [
+      "app_src_app_forgot_password_page",
+      "app_src_app_forgot_password_page_forgotpasswordpage",
+      "app_src_app_login_page",
+      "app_src_app_login_page_loginform",
+      "app_src_app_login_page_loginpage",
+      "app_src_app_register_page",
+      "app_src_app_register_page_registerpage",
+      "app_src_app_reset_password_page",
+      "app_src_app_reset_password_page_resetform",
+      "app_src_app_reset_password_page_resetpasswordpage"
+    ]
+  },
+  {
+    "community_id": 15,
+    "size": 19,
+    "top_nodes": [
+      "specs/002-lucid-style-studio/spec.md",
+      "specs/002-lucid-style-studio/spec.md#assumptions",
+      "specs/002-lucid-style-studio/spec.md#clarifications",
+      "specs/002-lucid-style-studio/spec.md#edge-cases",
+      "specs/002-lucid-style-studio/spec.md#feature-specification:-lucidchart-grade-studio-diagramming",
+      "specs/002-lucid-style-studio/spec.md#functional-requirements",
+      "specs/002-lucid-style-studio/spec.md#key-entities-*(include-if-feature-involves-data)*",
+      "specs/002-lucid-style-studio/spec.md#measurable-outcomes",
+      "specs/002-lucid-style-studio/spec.md#overview",
+      "specs/002-lucid-style-studio/spec.md#requirements-*(mandatory)*"
+    ]
+  },
+  {
+    "community_id": 16,
+    "size": 17,
+    "top_nodes": [
+      "specs/001-mvp-baseline/tasks.md",
+      "specs/001-mvp-baseline/tasks.md#dependencies-&-execution-order",
+      "specs/001-mvp-baseline/tasks.md#format:-`[id]-[p?]-[story]-description`",
+      "specs/001-mvp-baseline/tasks.md#implementation-strategy",
+      "specs/001-mvp-baseline/tasks.md#notes",
+      "specs/001-mvp-baseline/tasks.md#parallel-opportunities",
+      "specs/001-mvp-baseline/tasks.md#phase-10:-polish-&-cross-cutting-concerns",
+      "specs/001-mvp-baseline/tasks.md#phase-1:-setup-(shared-infrastructure)",
+      "specs/001-mvp-baseline/tasks.md#phase-2:-foundational-(blocking-prerequisites)",
+      "specs/001-mvp-baseline/tasks.md#phase-3:-user-story-1---account-&-access-(priority:-p1)-🎯-mvp"
+    ]
+  },
+  {
+    "community_id": 17,
+    "size": 16,
+    "top_nodes": [
+      ".agents/skills/speckit-converge/SKILL.md",
+      ".agents/skills/speckit-converge/SKILL.md#1.-initialize-convergence-context",
+      ".agents/skills/speckit-converge/SKILL.md#2.-load-artifacts-(progressive-disclosure)",
+      ".agents/skills/speckit-converge/SKILL.md#3.-build-the-intent-inventory",
+      ".agents/skills/speckit-converge/SKILL.md#4.-assess-the-codebase-and-classify-findings",
+      ".agents/skills/speckit-converge/SKILL.md#5.-assign-severity",
+      ".agents/skills/speckit-converge/SKILL.md#6.-present-the-in-session-findings-summary",
+      ".agents/skills/speckit-converge/SKILL.md#7.-append-convergence-tasks-(or-report-converged)",
+      ".agents/skills/speckit-converge/SKILL.md#8.-provide-next-actions-(handoff)",
+      ".agents/skills/speckit-converge/SKILL.md#9.-check-for-extension-hooks"
+    ]
+  },
+  {
+    "community_id": 18,
+    "size": 16,
+    "top_nodes": [
+      "app_src_app_dashboard_settings_page",
+      "app_src_app_dashboard_settings_page_accents",
+      "app_src_app_dashboard_settings_page_appearancesection",
+      "app_src_app_dashboard_settings_page_billingsection",
+      "app_src_app_dashboard_settings_page_dangersection",
+      "app_src_app_dashboard_settings_page_field",
+      "app_src_app_dashboard_settings_page_notificationssection",
+      "app_src_app_dashboard_settings_page_panel",
+      "app_src_app_dashboard_settings_page_profilesection",
+      "app_src_app_dashboard_settings_page_row"
+    ]
+  },
+  {
+    "community_id": 19,
+    "size": 15,
+    "top_nodes": [
+      "app_src_components_studio_alignmentguides",
+      "app_src_components_studio_alignmentguides_alignmentguides",
+      "app_src_lib_canvas_align",
+      "app_src_lib_canvas_align_alignboxes",
+      "app_src_lib_canvas_align_alignmode",
+      "app_src_lib_canvas_align_distributeaxis",
+      "app_src_lib_canvas_align_distributeboxes",
+      "app_src_lib_canvas_guides",
+      "app_src_lib_canvas_guides_box",
+      "app_src_lib_canvas_guides_computeguides"
+    ]
+  },
+  {
+    "community_id": 20,
+    "size": 15,
+    "top_nodes": [
+      "app_src_components_studio_canvas_canvasprops",
+      "app_src_components_studio_inspector",
+      "app_src_components_studio_inspector_canvasnode",
+      "app_src_components_studio_inspector_inspector",
+      "app_src_components_studio_minimappanel",
+      "app_src_components_studio_minimappanel_minimappanel",
+      "app_src_components_studio_servicenode",
+      "app_src_components_studio_servicenode_servicenode",
+      "app_src_components_studio_servicenode_servicenodedata",
+      "app_src_components_studio_servicenode_servicenodeimpl"
+    ]
+  },
+  {
+    "community_id": 21,
+    "size": 15,
+    "top_nodes": [
+      "app_src_components_studio_palette",
+      "app_src_components_studio_palette_palette",
+      "app_src_lib_catalog",
+      "app_src_lib_catalog_provider",
+      "app_src_lib_catalog_providers",
+      "app_src_lib_catalog_services",
+      "app_src_lib_catalog_servicesbyprovider",
+      "app_src_lib_providers_aws_catalog",
+      "app_src_lib_providers_aws_catalog_aws_container_types",
+      "app_src_lib_providers_aws_catalog_aws_regions"
+    ]
+  },
+  {
+    "community_id": 22,
+    "size": 15,
+    "top_nodes": [
+      "app_src_lib_providers_aws_auth",
+      "app_src_lib_providers_aws_auth_describessoaccount",
+      "app_src_lib_providers_aws_auth_deviceauthorization",
+      "app_src_lib_providers_aws_auth_polldevicetoken",
+      "app_src_lib_providers_aws_auth_ssoaccountinfo",
+      "app_src_lib_providers_aws_auth_ssoexpirederror",
+      "app_src_lib_providers_aws_auth_ssoexpirederror_constructor",
+      "app_src_lib_providers_aws_auth_ssonotconfigurederror",
+      "app_src_lib_providers_aws_auth_ssonotconfigurederror_constructor",
+      "app_src_lib_providers_aws_auth_ssopendingerror"
+    ]
+  },
+  {
+    "community_id": 23,
+    "size": 15,
+    "top_nodes": [
+      "app_src_lib_providers_aws_mcp_awsmcp",
+      "app_src_lib_providers_mongodb_catalog",
+      "app_src_lib_providers_mongodb_catalog_atlas_monthly",
+      "app_src_lib_providers_mongodb_catalog_mongodb_container_types",
+      "app_src_lib_providers_mongodb_catalog_mongodb_services",
+      "app_src_lib_providers_mongodb_catalog_num",
+      "app_src_lib_providers_mongodb_mcp_mongodbmcp",
+      "app_src_lib_providers_mongodb_pricing",
+      "app_src_lib_providers_mongodb_pricing_mongodbpricing",
+      "app_src_lib_providers_registry"
+    ]
+  },
+  {
+    "community_id": 24,
+    "size": 15,
+    "top_nodes": [
+      "specs/002-lucid-style-studio/tasks.md",
+      "specs/002-lucid-style-studio/tasks.md#dependencies-&-execution-order",
+      "specs/002-lucid-style-studio/tasks.md#format:-`[id]-[p?]-[story]-description`",
+      "specs/002-lucid-style-studio/tasks.md#implementation-strategy",
+      "specs/002-lucid-style-studio/tasks.md#parallel-opportunities",
+      "specs/002-lucid-style-studio/tasks.md#phase-1:-setup",
+      "specs/002-lucid-style-studio/tasks.md#phase-2:-foundational-(blocking-prerequisites)",
+      "specs/002-lucid-style-studio/tasks.md#phase-3:-user-story-1---precise-layout-without-fiddling-(priority:-p1)-🎯-mvp",
+      "specs/002-lucid-style-studio/tasks.md#phase-4:-user-story-2---cloud-boundary-containers-(priority:-p1)",
+      "specs/002-lucid-style-studio/tasks.md#phase-5:-user-story-3---fast-editing-interactions-(priority:-p2)"
+    ]
+  },
+  {
+    "community_id": 25,
+    "size": 14,
+    "top_nodes": [
+      "specify_scripts_powershell_common",
+      "specify_scripts_powershell_common_find_specifyroot",
+      "specify_scripts_powershell_common_format_speckitcommand",
+      "specify_scripts_powershell_common_get_currentbranch",
+      "specify_scripts_powershell_common_get_featurepathsenv",
+      "specify_scripts_powershell_common_get_invokeseparator",
+      "specify_scripts_powershell_common_get_python3command",
+      "specify_scripts_powershell_common_get_reporoot",
+      "specify_scripts_powershell_common_resolve_specifyinitdir",
+      "specify_scripts_powershell_common_resolve_template"
+    ]
+  },
+  {
+    "community_id": 26,
+    "size": 13,
+    "top_nodes": [
+      "app_src_lib_providers_aws_catalog_aws_services",
+      "app_src_lib_providers_aws_pricing",
+      "app_src_lib_providers_aws_pricing_awspricing",
+      "app_src_lib_providers_aws_pricing_cache",
+      "app_src_lib_providers_aws_pricing_indicative",
+      "app_src_lib_providers_aws_pricing_noderegion",
+      "app_src_lib_providers_aws_pricing_num",
+      "app_src_lib_providers_aws_pricing_region_location",
+      "app_src_lib_providers_aws_pricing_viacostmcp",
+      "app_src_lib_providers_aws_pricing_viapricelist"
+    ]
+  },
+  {
+    "community_id": 27,
+    "size": 13,
+    "top_nodes": [
+      "app_src_lib_providers_aws_mcp",
+      "app_src_lib_providers_mcp_client",
+      "app_src_lib_providers_mcp_client_callmcptool",
+      "app_src_lib_providers_mcp_client_clients",
+      "app_src_lib_providers_mcp_client_connect",
+      "app_src_lib_providers_mcp_client_getmcpclient",
+      "app_src_lib_providers_mcp_client_listmcptools",
+      "app_src_lib_providers_mcp_client_parsecommand",
+      "app_src_lib_providers_mongodb_mcp",
+      "app_src_lib_providers_types_mcpadapter"
+    ]
+  },
+  {
+    "community_id": 28,
+    "size": 13,
+    "top_nodes": [
+      "specs/001-mvp-baseline/research.md",
+      "specs/001-mvp-baseline/research.md#phase-0-research-—-cloud-architecture-studio-ai-mvp",
+      "specs/001-mvp-baseline/research.md#r1.-aws-service-recommendations-&-generation",
+      "specs/001-mvp-baseline/research.md#r10.-input-validation",
+      "specs/001-mvp-baseline/research.md#r11.-conversational-generation-(persistent-per-project-chat)",
+      "specs/001-mvp-baseline/research.md#r2.-mongodb-atlas-recommendations",
+      "specs/001-mvp-baseline/research.md#r3.-live-pricing",
+      "specs/001-mvp-baseline/research.md#r4.-aws-account-connection-(auth)",
+      "specs/001-mvp-baseline/research.md#r5.-email-delivery-(verification-+-password-reset)",
+      "specs/001-mvp-baseline/research.md#r6.-persistence-&-multi-tenant-scoping"
+    ]
+  },
+  {
+    "community_id": 29,
+    "size": 12,
+    "top_nodes": [
+      ".specify/memory/constitution.md",
+      ".specify/memory/constitution.md#amendment-log",
+      ".specify/memory/constitution.md#cloud-architecture-studio-ai-—-constitution",
+      ".specify/memory/constitution.md#core-principles",
+      ".specify/memory/constitution.md#development-workflow",
+      ".specify/memory/constitution.md#governance",
+      ".specify/memory/constitution.md#i.-official-integrations-first",
+      ".specify/memory/constitution.md#ii.-plugin-based,-extensible-providers",
+      ".specify/memory/constitution.md#iii.-api-first-&-secure-by-default-(non-negotiable)",
+      ".specify/memory/constitution.md#iv.-spec-driven-delivery"
+    ]
+  },
+  {
+    "community_id": 30,
+    "size": 12,
+    "top_nodes": [
+      "specs/001-mvp-baseline/data-model.md",
+      "specs/001-mvp-baseline/data-model.md#aiconversation-*(new-—-one-persistent-thread-per-project)*",
+      "specs/001-mvp-baseline/data-model.md#architecture-*(new)*",
+      "specs/001-mvp-baseline/data-model.md#connection-*(new)*",
+      "specs/001-mvp-baseline/data-model.md#costestimate-*(new-—-may-be-embedded-snapshot-on-architecture)*",
+      "specs/001-mvp-baseline/data-model.md#entities",
+      "specs/001-mvp-baseline/data-model.md#export-*(new-—-lightweight/audit)*",
+      "specs/001-mvp-baseline/data-model.md#phase-1-data-model-—-cloud-architecture-studio-ai-mvp",
+      "specs/001-mvp-baseline/data-model.md#project-*(new)*",
+      "specs/001-mvp-baseline/data-model.md#provider-plugin-model-*(new-—-`lib/providers/`)*"
+    ]
+  },
+  {
+    "community_id": 31,
+    "size": 12,
+    "top_nodes": [
+      "specs/002-lucid-style-studio/research.md",
+      "specs/002-lucid-style-studio/research.md#phase-0-research-—-lucidchart-grade-studio-diagramming",
+      "specs/002-lucid-style-studio/research.md#r1.-orthogonal-auto-routed-connections-(fr-001,-fr-002)",
+      "specs/002-lucid-style-studio/research.md#r10.-performance-at-sc-004-scale-(100-nodes-/-20-containers)",
+      "specs/002-lucid-style-studio/research.md#r2.-containers-as-react-flow-subflows-(fr-005–007)",
+      "specs/002-lucid-style-studio/research.md#r3.-snap,-alignment-guides,-align/distribute-(fr-003,-fr-004)",
+      "specs/002-lucid-style-studio/research.md#r4.-auto-arrange-via-elkjs-(fr-018)-—-justified-community-dependency",
+      "specs/002-lucid-style-studio/research.md#r5.-minimap,-zoom-controls,-find-(fr-015)",
+      "specs/002-lucid-style-studio/research.md#r6.-clipboard,-duplicate,-shortcuts,-context-menu-(fr-008–011)",
+      "specs/002-lucid-style-studio/research.md#r7.-architecture-document-extensions-(fr-005–007,-fr-012–014,-key-entities)"
+    ]
+  },
+  {
+    "community_id": 32,
+    "size": 11,
+    "top_nodes": [
+      ".agents/skills/speckit-plan/SKILL.md",
+      ".agents/skills/speckit-plan/SKILL.md#completion-report",
+      ".agents/skills/speckit-plan/SKILL.md#done-when",
+      ".agents/skills/speckit-plan/SKILL.md#key-rules",
+      ".agents/skills/speckit-plan/SKILL.md#mandatory-post-execution-hooks",
+      ".agents/skills/speckit-plan/SKILL.md#outline",
+      ".agents/skills/speckit-plan/SKILL.md#phase-0:-outline-&-research",
+      ".agents/skills/speckit-plan/SKILL.md#phase-1:-design-&-contracts",
+      ".agents/skills/speckit-plan/SKILL.md#phases",
+      ".agents/skills/speckit-plan/SKILL.md#pre-execution-checks"
+    ]
+  },
+  {
+    "community_id": 33,
+    "size": 11,
+    "top_nodes": [
+      ".agents/skills/speckit-specify/SKILL.md",
+      ".agents/skills/speckit-specify/SKILL.md#completion-report",
+      ".agents/skills/speckit-specify/SKILL.md#done-when",
+      ".agents/skills/speckit-specify/SKILL.md#for-ai-generation",
+      ".agents/skills/speckit-specify/SKILL.md#mandatory-post-execution-hooks",
+      ".agents/skills/speckit-specify/SKILL.md#outline",
+      ".agents/skills/speckit-specify/SKILL.md#pre-execution-checks",
+      ".agents/skills/speckit-specify/SKILL.md#quick-guidelines",
+      ".agents/skills/speckit-specify/SKILL.md#section-requirements",
+      ".agents/skills/speckit-specify/SKILL.md#success-criteria-guidelines"
+    ]
+  },
+  {
+    "community_id": 34,
+    "size": 11,
+    "top_nodes": [
+      ".agents/skills/speckit-tasks/SKILL.md",
+      ".agents/skills/speckit-tasks/SKILL.md#checklist-format-(required)",
+      ".agents/skills/speckit-tasks/SKILL.md#completion-report",
+      ".agents/skills/speckit-tasks/SKILL.md#done-when",
+      ".agents/skills/speckit-tasks/SKILL.md#mandatory-post-execution-hooks",
+      ".agents/skills/speckit-tasks/SKILL.md#outline",
+      ".agents/skills/speckit-tasks/SKILL.md#phase-structure",
+      ".agents/skills/speckit-tasks/SKILL.md#pre-execution-checks",
+      ".agents/skills/speckit-tasks/SKILL.md#task-generation-rules",
+      ".agents/skills/speckit-tasks/SKILL.md#task-organization"
+    ]
+  },
+  {
+    "community_id": 35,
+    "size": 11,
+    "top_nodes": [
+      "app_src_app_dashboard_connections_page",
+      "app_src_app_dashboard_connections_page_atlassection",
+      "app_src_app_dashboard_connections_page_awssection",
+      "app_src_app_dashboard_connections_page_connectionspage",
+      "app_src_app_dashboard_connections_page_connectionview",
+      "app_src_app_dashboard_connections_page_deviceinfo",
+      "app_src_app_dashboard_connections_page_timeuntil",
+      "app_src_components_ui_badge",
+      "app_src_components_ui_badge_badge",
+      "app_src_components_ui_badge_badgeprops"
+    ]
+  },
+  {
+    "community_id": 36,
+    "size": 11,
+    "top_nodes": [
+      "app_src_app_dashboard_layout",
+      "app_src_app_dashboard_layout_dashboardlayout",
+      "app_src_components_layout_mobilenav",
+      "app_src_components_layout_mobilenav_mobilenav",
+      "app_src_components_layout_nav_items",
+      "app_src_components_layout_nav_items_isnavactive",
+      "app_src_components_layout_nav_items_nav_items",
+      "app_src_components_layout_sidebar",
+      "app_src_components_layout_sidebar_sidebar",
+      "app_src_components_layout_topnav"
+    ]
+  },
+  {
+    "community_id": 37,
+    "size": 11,
+    "top_nodes": [
+      "specs/001-mvp-baseline/quickstart.md",
+      "specs/001-mvp-baseline/quickstart.md#gates-(constitution-v-—-verify-before-done)",
+      "specs/001-mvp-baseline/quickstart.md#prerequisites",
+      "specs/001-mvp-baseline/quickstart.md#quickstart-&-validation-—-cloud-architecture-studio-ai-mvp",
+      "specs/001-mvp-baseline/quickstart.md#setup",
+      "specs/001-mvp-baseline/quickstart.md#validation-scenarios-(map-to-user-stories)",
+      "specs/002-lucid-style-studio/quickstart.md",
+      "specs/002-lucid-style-studio/quickstart.md#gates-(constitution-v-—-verify-before-done)",
+      "specs/002-lucid-style-studio/quickstart.md#prerequisites",
+      "specs/002-lucid-style-studio/quickstart.md#quickstart-&-validation-—-lucidchart-grade-studio-diagramming"
+    ]
+  },
+  {
+    "community_id": 38,
+    "size": 10,
+    "top_nodes": [
+      "app_src_lib_llm",
+      "app_src_lib_llm_apikey",
+      "app_src_lib_llm_callanthropic",
+      "app_src_lib_llm_callgroq",
+      "app_src_lib_llm_completionopts",
+      "app_src_lib_llm_default_model",
+      "app_src_lib_llm_getanthropicclient",
+      "app_src_lib_llm_llmavailable",
+      "app_src_lib_llm_llmjson",
+      "app_src_lib_llm_provider"
+    ]
+  },
+  {
+    "community_id": 39,
+    "size": 9,
+    "top_nodes": [
+      "app_src_lib_canvas_clipboard",
+      "app_src_lib_canvas_clipboard_clipboardedge",
+      "app_src_lib_canvas_clipboard_clipboardnode",
+      "app_src_lib_canvas_clipboard_clipboardpayload",
+      "app_src_lib_canvas_clipboard_copytoclipboard",
+      "app_src_lib_canvas_clipboard_duplicateselection",
+      "app_src_lib_canvas_clipboard_newid",
+      "app_src_lib_canvas_clipboard_pastefromclipboard",
+      "app_tests_canvas_clipboard_test"
+    ]
+  },
+  {
+    "community_id": 40,
+    "size": 9,
+    "top_nodes": [
+      "app_src_lib_canvas_layout",
+      "app_src_lib_canvas_layout_buildtree",
+      "app_src_lib_canvas_layout_elknode",
+      "app_src_lib_canvas_layout_layoutedge",
+      "app_src_lib_canvas_layout_layoutnode",
+      "app_src_lib_canvas_layout_layoutresult",
+      "app_src_lib_canvas_layout_layoutwithelk",
+      "app_src_lib_canvas_layout_toelknode",
+      "app_tests_canvas_layout_test"
+    ]
+  },
+  {
+    "community_id": 41,
+    "size": 9,
+    "top_nodes": [
+      "app_src_lib_generate_diff",
+      "app_src_lib_generate_diff_diffannotation",
+      "app_src_lib_generate_diff_diffcontainer",
+      "app_src_lib_generate_diff_diffedge",
+      "app_src_lib_generate_diff_diffnode",
+      "app_src_lib_generate_diff_summarizearchitectureedit",
+      "app_tests_diff_test",
+      "app_tests_diff_test_edge",
+      "app_tests_diff_test_node"
+    ]
+  },
+  {
+    "community_id": 42,
+    "size": 9,
+    "top_nodes": [
+      "specs/001-mvp-baseline/plan.md",
+      "specs/001-mvp-baseline/plan.md#complexity-tracking",
+      "specs/001-mvp-baseline/plan.md#constitution-check",
+      "specs/001-mvp-baseline/plan.md#documentation-(this-feature)",
+      "specs/001-mvp-baseline/plan.md#implementation-plan:-cloud-architecture-studio-ai-—-mvp",
+      "specs/001-mvp-baseline/plan.md#project-structure",
+      "specs/001-mvp-baseline/plan.md#source-code-(repository-root)",
+      "specs/001-mvp-baseline/plan.md#summary",
+      "specs/001-mvp-baseline/plan.md#technical-context"
+    ]
+  },
+  {
+    "community_id": 43,
+    "size": 9,
+    "top_nodes": [
+      "specs/002-lucid-style-studio/data-model.md",
+      "specs/002-lucid-style-studio/data-model.md#annotation-*(new,-embedded)*",
+      "specs/002-lucid-style-studio/data-model.md#architecture-(extended)",
+      "specs/002-lucid-style-studio/data-model.md#container-*(new,-embedded)*",
+      "specs/002-lucid-style-studio/data-model.md#phase-1-data-model-—-lucidchart-grade-studio-diagramming",
+      "specs/002-lucid-style-studio/data-model.md#serviceedge-(extended)",
+      "specs/002-lucid-style-studio/data-model.md#servicenode-(extended)",
+      "specs/002-lucid-style-studio/data-model.md#state-&-sync-notes",
+      "specs/002-lucid-style-studio/data-model.md#validation-(server-side,-zod-—-extends-001-r10)"
+    ]
+  },
+  {
+    "community_id": 44,
+    "size": 9,
+    "top_nodes": [
+      "specs/002-lucid-style-studio/plan.md",
+      "specs/002-lucid-style-studio/plan.md#complexity-tracking",
+      "specs/002-lucid-style-studio/plan.md#constitution-check",
+      "specs/002-lucid-style-studio/plan.md#documentation-(this-feature)",
+      "specs/002-lucid-style-studio/plan.md#implementation-plan:-lucidchart-grade-studio-diagramming",
+      "specs/002-lucid-style-studio/plan.md#project-structure",
+      "specs/002-lucid-style-studio/plan.md#source-code-(repository-root)",
+      "specs/002-lucid-style-studio/plan.md#summary",
+      "specs/002-lucid-style-studio/plan.md#technical-context"
+    ]
+  },
+  {
+    "community_id": 45,
+    "size": 8,
+    "top_nodes": [
+      ".agents/skills/speckit-checklist/SKILL.md",
+      ".agents/skills/speckit-checklist/SKILL.md#anti-examples:-what-not-to-do",
+      ".agents/skills/speckit-checklist/SKILL.md#checklist-purpose:-\"unit-tests-for-english\"",
+      ".agents/skills/speckit-checklist/SKILL.md#example-checklist-types-&-sample-items",
+      ".agents/skills/speckit-checklist/SKILL.md#execution-steps",
+      ".agents/skills/speckit-checklist/SKILL.md#post-execution-checks",
+      ".agents/skills/speckit-checklist/SKILL.md#pre-execution-checks",
+      ".agents/skills/speckit-checklist/SKILL.md#user-input"
+    ]
+  },
+  {
+    "community_id": 46,
+    "size": 8,
+    "top_nodes": [
+      "app_src_lib_pricing",
+      "app_src_lib_pricing_estimateresult",
+      "app_src_lib_pricing_pricednode",
+      "app_src_lib_providers_types",
+      "app_src_lib_providers_types_costbasis",
+      "app_src_lib_providers_types_mcprecommendation",
+      "app_src_lib_providers_types_mcprecommendresult",
+      "app_src_lib_providers_types_serviceconfig"
+    ]
+  },
+  {
+    "community_id": 47,
+    "size": 8,
+    "top_nodes": [
+      "specs/001-mvp-baseline/checklists/pre-implementation.md",
+      "specs/001-mvp-baseline/checklists/pre-implementation.md#chat-&-ai-generation-(fr-014a–d,-fr-015,-fr-016a)",
+      "specs/001-mvp-baseline/checklists/pre-implementation.md#dependencies-&-assumptions",
+      "specs/001-mvp-baseline/checklists/pre-implementation.md#notes",
+      "specs/001-mvp-baseline/checklists/pre-implementation.md#pre-implementation-requirements-checklist:-cloud-architecture-studio-ai-—-mvp",
+      "specs/001-mvp-baseline/checklists/pre-implementation.md#pricing-accuracy-(fr-019–021,-sc-002)",
+      "specs/001-mvp-baseline/checklists/pre-implementation.md#security-&-connections-(fr-004,-fr-006–013,-fr-025)",
+      "specs/001-mvp-baseline/checklists/pre-implementation.md#ux-&-accessibility-(fr-016,-fr-026)"
+    ]
+  },
+  {
+    "community_id": 48,
+    "size": 7,
+    "top_nodes": [
+      ".agents/skills/speckit-clarify/SKILL.md",
+      ".agents/skills/speckit-clarify/SKILL.md#completion-report",
+      ".agents/skills/speckit-clarify/SKILL.md#done-when",
+      ".agents/skills/speckit-clarify/SKILL.md#mandatory-post-execution-hooks",
+      ".agents/skills/speckit-clarify/SKILL.md#outline",
+      ".agents/skills/speckit-clarify/SKILL.md#pre-execution-checks",
+      ".agents/skills/speckit-clarify/SKILL.md#user-input"
+    ]
+  },
+  {
+    "community_id": 49,
+    "size": 7,
+    "top_nodes": [
+      ".agents/skills/speckit-implement/SKILL.md",
+      ".agents/skills/speckit-implement/SKILL.md#completion-report",
+      ".agents/skills/speckit-implement/SKILL.md#done-when",
+      ".agents/skills/speckit-implement/SKILL.md#mandatory-post-execution-hooks",
+      ".agents/skills/speckit-implement/SKILL.md#outline",
+      ".agents/skills/speckit-implement/SKILL.md#pre-execution-checks",
+      ".agents/skills/speckit-implement/SKILL.md#user-input"
+    ]
+  },
+  {
+    "community_id": 50,
+    "size": 7,
+    "top_nodes": [
+      "app_src_components_studio_containernode",
+      "app_src_components_studio_containernode_containernode",
+      "app_src_components_studio_containernode_containernodeextra",
+      "app_src_components_studio_containernode_containernodeimpl",
+      "app_src_lib_canvas_model_containernodedata",
+      "app_src_lib_catalog_container_types",
+      "app_src_lib_catalog_containertypebyid"
+    ]
+  },
+  {
+    "community_id": 51,
+    "size": 7,
+    "top_nodes": [
+      "app_src_lib_providers_mongodb_auth",
+      "app_src_lib_providers_mongodb_auth_atlasautherror",
+      "app_src_lib_providers_mongodb_auth_atlasorginfo",
+      "app_src_lib_providers_mongodb_auth_digestjson",
+      "app_src_lib_providers_mongodb_auth_md5",
+      "app_src_lib_providers_mongodb_auth_parsechallenge",
+      "app_src_lib_providers_mongodb_auth_verifyatlaskey"
+    ]
+  },
+  {
+    "community_id": 52,
+    "size": 7,
+    "top_nodes": [
+      "specs/002-lucid-style-studio/contracts/canvas-interactions.md",
+      "specs/002-lucid-style-studio/contracts/canvas-interactions.md#connections",
+      "specs/002-lucid-style-studio/contracts/canvas-interactions.md#contract:-canvas-interaction-&-accessibility-(fr-001–004,-fr-008–011,-fr-015–016,-fr-018)",
+      "specs/002-lucid-style-studio/contracts/canvas-interactions.md#keyboard-contract-(fr-010,-fr-016)",
+      "specs/002-lucid-style-studio/contracts/canvas-interactions.md#layout-assists",
+      "specs/002-lucid-style-studio/contracts/canvas-interactions.md#navigation",
+      "specs/002-lucid-style-studio/contracts/canvas-interactions.md#selection-&-editing"
+    ]
+  },
+  {
+    "community_id": 53,
+    "size": 6,
+    "top_nodes": [
+      "specs/002-lucid-style-studio/checklists/requirements.md",
+      "specs/002-lucid-style-studio/checklists/requirements.md#content-quality",
+      "specs/002-lucid-style-studio/checklists/requirements.md#feature-readiness",
+      "specs/002-lucid-style-studio/checklists/requirements.md#notes",
+      "specs/002-lucid-style-studio/checklists/requirements.md#requirement-completeness",
+      "specs/002-lucid-style-studio/checklists/requirements.md#specification-quality-checklist:-lucidchart-grade-studio-diagramming"
+    ]
+  },
+  {
+    "community_id": 54,
+    "size": 5,
+    "top_nodes": [
+      ".agents/skills/speckit-constitution/SKILL.md",
+      ".agents/skills/speckit-constitution/SKILL.md#outline",
+      ".agents/skills/speckit-constitution/SKILL.md#post-execution-checks",
+      ".agents/skills/speckit-constitution/SKILL.md#pre-execution-checks",
+      ".agents/skills/speckit-constitution/SKILL.md#user-input"
+    ]
+  },
+  {
+    "community_id": 55,
+    "size": 5,
+    "top_nodes": [
+      ".agents/skills/speckit-taskstoissues/SKILL.md",
+      ".agents/skills/speckit-taskstoissues/SKILL.md#outline",
+      ".agents/skills/speckit-taskstoissues/SKILL.md#post-execution-checks",
+      ".agents/skills/speckit-taskstoissues/SKILL.md#pre-execution-checks",
+      ".agents/skills/speckit-taskstoissues/SKILL.md#user-input"
+    ]
+  },
+  {
+    "community_id": 56,
+    "size": 5,
+    "top_nodes": [
+      "app/README.md",
+      "app/README.md#deploy-on-vercel",
+      "app/README.md#getting-started",
+      "app/README.md#learn-more",
+      "app/README.md#or"
+    ]
+  },
+  {
+    "community_id": 57,
+    "size": 5,
+    "top_nodes": [
+      "specs/002-lucid-style-studio/contracts/architecture-extensions.md",
+      "specs/002-lucid-style-studio/contracts/architecture-extensions.md#`get-/api/projects/[id]/architecture`-(via-project-load)",
+      "specs/002-lucid-style-studio/contracts/architecture-extensions.md#`put-/api/projects/[id]/architecture`",
+      "specs/002-lucid-style-studio/contracts/architecture-extensions.md#chat-orchestrator-contract-delta-(r8)",
+      "specs/002-lucid-style-studio/contracts/architecture-extensions.md#contract:-architecture-payload-extensions-(fr-005–007,-fr-012–014,-fr-017)"
+    ]
+  },
+  {
+    "community_id": 58,
+    "size": 4,
+    "top_nodes": [
+      "app_scripts_seed",
+      "app_scripts_seed_dirname",
+      "app_scripts_seed_email",
+      "app_scripts_seed_userschema"
+    ]
+  },
+  {
+    "community_id": 59,
+    "size": 4,
+    "top_nodes": [
+      "app_src_lib_models_costestimate",
+      "app_src_lib_models_costestimate_costestimatedoc",
+      "app_src_lib_models_costestimate_costestimateschema",
+      "app_src_lib_models_costestimate_perserviceschema"
+    ]
+  },
+  {
+    "community_id": 60,
+    "size": 4,
+    "top_nodes": [
+      "specify_scripts_powershell_create_new_feature",
+      "specify_scripts_powershell_create_new_feature_convertto_cleanbranchname",
+      "specify_scripts_powershell_create_new_feature_get_branchname",
+      "specify_scripts_powershell_create_new_feature_get_highestnumberfromspecs"
+    ]
+  },
+  {
+    "community_id": 61,
+    "size": 3,
+    "top_nodes": [
+      "app_src_app_api_auth_logout_route",
+      "app_src_app_api_auth_logout_route_post",
+      "app_src_lib_session_clearsession"
+    ]
+  },
+  {
+    "community_id": 62,
+    "size": 3,
+    "top_nodes": [
+      "app_src_app_layout",
+      "app_src_app_layout_metadata",
+      "app_src_app_layout_rootlayout"
+    ]
+  },
+  {
+    "community_id": 63,
+    "size": 3,
+    "top_nodes": [
+      "mcp",
+      "mcp_command_npx",
+      "mcp_mcp_server_stitch"
+    ]
+  },
+  {
+    "community_id": 64,
+    "size": 2,
+    "top_nodes": [
+      ".agents/rules/graphify.md",
+      ".agents/rules/graphify.md#graphify"
+    ]
+  },
+  {
+    "community_id": 65,
+    "size": 2,
+    "top_nodes": [
+      ".agents/workflows/graphify.md",
+      ".agents/workflows/graphify.md#workflow:-graphify"
+    ]
+  },
+  {
+    "community_id": 66,
+    "size": 2,
+    "top_nodes": [
+      "app_eslint_config",
+      "app_eslint_config_eslintconfig"
+    ]
+  },
+  {
+    "community_id": 67,
+    "size": 2,
+    "top_nodes": [
+      "app_next_config",
+      "app_next_config_nextconfig"
+    ]
+  },
+  {
+    "community_id": 68,
+    "size": 2,
+    "top_nodes": [
+      "app_next_env_d",
+      "app_next_env_d_rationale_5"
+    ]
+  },
+  {
+    "community_id": 69,
+    "size": 2,
+    "top_nodes": [
+      "app_postcss_config",
+      "app_postcss_config_config"
+    ]
+  },
+  {
+    "community_id": 70,
+    "size": 2,
+    "top_nodes": [
+      "specs/002-lucid-style-studio/contracts/export-fidelity.md",
+      "specs/002-lucid-style-studio/contracts/export-fidelity.md#contract:-export-fidelity-tiers-(fr-007,-sc-005)"
+    ]
+  },
+  {
+    "community_id": 71,
+    "size": 1,
+    "top_nodes": [
+      "app/CLAUDE.md"
+    ]
+  },
+  {
+    "community_id": 72,
+    "size": 1,
+    "top_nodes": [
+      "app/public/file.svg"
+    ]
+  },
+  {
+    "community_id": 73,
+    "size": 1,
+    "top_nodes": [
+      "app/public/globe.svg"
+    ]
+  },
+  {
+    "community_id": 74,
+    "size": 1,
+    "top_nodes": [
+      "app/public/next.svg"
+    ]
+  },
+  {
+    "community_id": 75,
+    "size": 1,
+    "top_nodes": [
+      "app/public/vercel.svg"
+    ]
+  },
+  {
+    "community_id": 76,
+    "size": 1,
+    "top_nodes": [
+      "app/public/window.svg"
+    ]
+  },
+  {
+    "community_id": 77,
+    "size": 1,
+    "top_nodes": [
+      "app_tests_stubs_server_only"
+    ]
+  },
+  {
+    "community_id": 78,
+    "size": 1,
+    "top_nodes": [
+      "app_vitest_config"
+    ]
+  },
+  {
+    "community_id": 79,
+    "size": 1,
+    "top_nodes": [
+      "specify_scripts_powershell_check_prerequisites"
+    ]
+  },
+  {
+    "community_id": 80,
+    "size": 1,
+    "top_nodes": [
+      "specify_scripts_powershell_setup_plan"
+    ]
+  },
+  {
+    "community_id": 81,
+    "size": 1,
+    "top_nodes": [
+      "specify_scripts_powershell_setup_tasks"
+    ]
+  }
+]
