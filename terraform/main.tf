@@ -161,3 +161,45 @@ resource "vercel_project_environment_variable" "env_resend_api_key" {
   value      = var.resend_api_key
   target     = ["production", "preview", "development"]
 }
+
+resource "vercel_project_environment_variable" "env_email_provider" {
+  project_id = vercel_project.cas_vercel_project.id
+  key        = "EMAIL_PROVIDER"
+  value      = "smtp"
+  target     = ["production", "preview", "development"]
+}
+
+resource "vercel_project_environment_variable" "env_smtp_host" {
+  project_id = vercel_project.cas_vercel_project.id
+  key        = "SMTP_HOST"
+  value      = var.smtp_host
+  target     = ["production", "preview", "development"]
+}
+
+resource "vercel_project_environment_variable" "env_smtp_port" {
+  project_id = vercel_project.cas_vercel_project.id
+  key        = "SMTP_PORT"
+  value      = var.smtp_port
+  target     = ["production", "preview", "development"]
+}
+
+resource "vercel_project_environment_variable" "env_smtp_user" {
+  project_id = vercel_project.cas_vercel_project.id
+  key        = "SMTP_USER"
+  value      = var.smtp_user
+  target     = ["production", "preview", "development"]
+}
+
+resource "vercel_project_environment_variable" "env_smtp_pass" {
+  project_id = vercel_project.cas_vercel_project.id
+  key        = "SMTP_PASS"
+  value      = var.smtp_pass
+  target     = ["production", "preview", "development"]
+}
+
+resource "vercel_project_environment_variable" "env_email_from" {
+  project_id = vercel_project.cas_vercel_project.id
+  key        = "EMAIL_FROM"
+  value      = var.email_from
+  target     = ["production", "preview", "development"]
+}

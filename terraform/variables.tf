@@ -107,3 +107,34 @@ variable "resend_api_key" {
   sensitive   = true
   default     = ""
 }
+
+variable "smtp_host" {
+  type        = string
+  description = "SMTP Host for Mailtrap"
+  default     = "sandbox.smtp.mailtrap.io"
+}
+
+variable "smtp_port" {
+  type        = string
+  description = "SMTP Port for Mailtrap"
+  default     = "2525"
+}
+
+variable "smtp_user" {
+  type        = string
+  description = "SMTP User for Mailtrap"
+  default     = "158651ef857574"
+}
+
+variable "smtp_pass" {
+  type        = string
+  description = "SMTP Password for Mailtrap"
+  sensitive   = true
+  default     = "90a9a4499b856a"
+}
+
+variable "email_from" {
+  type        = string
+  description = "Default Email From address"
+  default     = "Cloud Architecture Studio <from@example.com>"
+}
