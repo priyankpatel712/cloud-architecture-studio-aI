@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import mongoose from 'mongoose';
 
+// Health check route - updated to pick up newly added environment variables
 export const runtime = 'nodejs';
 
 export async function GET() {
