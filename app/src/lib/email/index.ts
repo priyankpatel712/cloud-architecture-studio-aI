@@ -1,4 +1,5 @@
 import 'server-only';
+import nodemailer from 'nodemailer';
 
 /**
  * Email provider abstraction (research R5, FR-003/FR-004).
@@ -29,7 +30,6 @@ export function appBaseUrl(): string {
 }
 
 async function sendViaSmtp(msg: EmailMessage): Promise<SendResult> {
-  const nodemailer = await import('nodemailer');
   const host = process.env.SMTP_HOST || 'sandbox.smtp.mailtrap.io';
   const port = Number(process.env.SMTP_PORT || 587);
   const user = process.env.SMTP_USER || '158651ef857574';
