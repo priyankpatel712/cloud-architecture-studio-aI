@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import { Send, Loader2, CheckCircle2 } from 'lucide-react';
+import { Send, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { AuthShell } from '@/components/auth/AuthShell';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -10,18 +10,25 @@ export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [devUrl, setDevUrl] = useState<string | null>(null);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
+    setError(null);
     const res = await fetch('/api/auth/forgot', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email }),
     });
     const data = await res.json().catch(() => ({}));
-    setDevUrl(data.resetUrl ?? null); // dev-only link surfaced until email is wired
+    if (!res.ok) {
+      setError(data.error || 'Too many password-reset requests. Please try again later.');
+      setLoading(false);
+      return;
+    }
+    setDevUrl(data.resetUrl ?? null);
     setSent(true);
     setLoading(false);
   }
@@ -59,6 +66,12 @@ export default function ForgotPasswordPage() {
           onSubmit={submit}
           className="space-y-4 rounded-3xl border border-[var(--color-surface-variant)] bg-[var(--color-surface-container-lowest)] p-6 shadow-sm"
         >
+          {error && (
+            <div className="flex items-center gap-2 rounded-2xl border border-[var(--color-danger-subtle,#fca5a5)] bg-[var(--color-danger-container,#fef2f2)] p-3 text-xs text-[var(--color-danger,#dc2626)]">
+              <AlertCircle size={16} className="shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
           <label className="block">
             <span className="mb-1.5 block text-sm font-medium text-[var(--color-text-primary)]">Email</span>
             <Input type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com" />

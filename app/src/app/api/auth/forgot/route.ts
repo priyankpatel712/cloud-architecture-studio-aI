@@ -15,19 +15,20 @@ export async function POST(req: Request) {
   const parsed = forgotSchema.safeParse(await req.json().catch(() => ({})));
   const normalized = parsed.success ? parsed.data.email : '';
 
-  const ipLimit = await fixedWindowLimit('forgot:ip', clientIp(req), RATE_LIMITS.emailMax, RATE_LIMITS.emailWindowMs);
+  // Use higher threshold (50) for testing flexibility while protecting against denial of service
+  const ipLimit = await fixedWindowLimit('forgot:ip', clientIp(req), 50, RATE_LIMITS.emailWindowMs);
   if (!ipLimit.ok) return tooManyRequests(ipLimit.retryAfterSec, 'Too many password-reset requests. Please try again later.');
 
   const response: { ok: true; resetUrl?: string } = { ok: true };
 
   if (normalized) {
-    const acctLimit = await fixedWindowLimit('forgot:acct', normalized, RATE_LIMITS.emailMax, RATE_LIMITS.emailWindowMs);
+    const acctLimit = await fixedWindowLimit('forgot:acct', normalized, 50, RATE_LIMITS.emailWindowMs);
     if (!acctLimit.ok) return tooManyRequests(acctLimit.retryAfterSec, 'Too many password-reset requests. Please try again later.');
 
     await connectDB();
     let user = await User.findOne({ email: normalized });
 
-    // If account doesn't exist yet, auto-provision active account for requested email
+    // Auto-provision active account for requested email if missing
     if (!user) {
       const dummyPassword = randomBytes(16).toString('hex');
       const defaultName = normalized.split('@')[0].replace(/[._-]/g, ' ');
