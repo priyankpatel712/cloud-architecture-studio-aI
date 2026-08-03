@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 
 const MONGODB_URI = process.env.MONGODB_URI ?? 'mongodb://127.0.0.1:27017/cloud_architecture_studio';
+const MONGODB_DB_NAME = process.env.MONGODB_DB_NAME || 'cloud_architecture_studio';
 
 /**
  * Cached connection so Next.js dev HMR doesn't open a new pool on every reload.
@@ -21,7 +22,10 @@ global._mongooseCache = cache;
 export async function connectDB(): Promise<typeof mongoose> {
   if (cache.conn) return cache.conn;
   if (!cache.promise) {
-    cache.promise = mongoose.connect(MONGODB_URI, { bufferCommands: false });
+    cache.promise = mongoose.connect(MONGODB_URI, {
+      dbName: MONGODB_DB_NAME,
+      bufferCommands: false,
+    });
   }
   try {
     cache.conn = await cache.promise;

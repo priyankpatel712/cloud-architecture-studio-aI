@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
-import mongoose from 'mongoose';
 
-// Health check route - updated to pick up newly added environment variables
 export const runtime = 'nodejs';
 
 export async function GET() {
@@ -12,11 +10,13 @@ export async function GET() {
   const llmProvider = process.env.LLM_PROVIDER ?? 'nvidia';
 
   let dbConnected = false;
+  let dbName: string | null = null;
   let dbError: string | null = null;
 
   try {
     const conn = await connectDB();
     dbConnected = conn.connection.readyState === 1;
+    dbName = conn.connection.name;
   } catch (e: any) {
     dbError = e?.message || String(e);
   }
@@ -27,6 +27,7 @@ export async function GET() {
     {
       status: isHealthy ? 'ok' : 'degraded',
       dbConnected,
+      dbName,
       dbError,
       env: {
         hasMongoUri,
