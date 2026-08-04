@@ -72,7 +72,7 @@ export interface ChatInteraction {
   options?: ChatPricingOption[];
 }
 export interface ChatFlow {
-  awaiting: 'clarify' | 'cost_questions' | 'cost_options' | null;
+  awaiting: 'clarify' | 'cost_questions' | 'cost_options' | 'approval' | null;
   /** Required: the active-round gate compares this against each message's
    * interaction id — every flow payload (GET and stream) must carry it. */
   openInteractionId: string | null;

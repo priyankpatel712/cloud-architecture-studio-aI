@@ -48,6 +48,10 @@ export const STEP_KINDS = [
   'knowledge',
   'research',
   'distill',
+  // agentic-concepts (2026-08) — ReAct: an explicit Thought/Action/Observation
+  // entry from the loop's reasoning (lib/agent/react-log.ts), streamed live and
+  // persisted like any other step so the user can see WHY each move was made.
+  'reason',
 ] as const;
 
 export type StepKind = (typeof STEP_KINDS)[number];

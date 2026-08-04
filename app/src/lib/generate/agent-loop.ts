@@ -12,6 +12,10 @@ import { retrieveKnowledge, recordKnowledgeUsage } from '@/lib/knowledge/store';
 import { gatherKnowledge } from '@/lib/research/knowledge-agent';
 import { renderKnowledgeBlock } from '@/lib/knowledge/types';
 import { ITERATION_BUDGET, ABORT_THRESHOLD_MS, HARD_TIME_CAP_MS, chunkPlanDelayMs, CHUNK_ROUND_BUDGET, sleep } from '@/lib/generate/loop-config';
+import { COVERAGE_TARGET_PERCENT, coveragePercent, coverageSummary, meetsCoverageTarget, unmetRequirements } from '@/lib/agent/coverage';
+import { lowCoverageCheckpoint } from '@/lib/agent/hitl';
+import { createReActLog, type ReActEntry } from '@/lib/agent/react-log';
+import { agentById } from '@/lib/agent/roster';
 import type { TraceEmitter } from '@/lib/generate/trace-emitter';
 import {
   gatherGuidance,
@@ -128,6 +132,24 @@ export interface AgentLoopResult {
    * assistant message so the user sees exactly what was evaluated and how.
    */
   coverage: RequirementCoverage[];
+  /**
+   * agentic-concepts — measured coverage of the final checklist as a whole
+   * percent (100 when there was no checklist to grade). The acceptance policy
+   * (lib/agent/coverage.ts) requires ≥ COVERAGE_TARGET_PERCENT (80–90% band).
+   */
+  coveragePercent: number;
+  /**
+   * True when the design converged by MEETING THE ACCEPTANCE FLOOR (coverage ≥
+   * target) after the budget ran out, rather than a full 100% review pass. The
+   * reply names the outstanding gaps in that case.
+   */
+  acceptedAtThreshold?: boolean;
+  /**
+   * agentic-concepts (ReAct) — the turn's Thought/Action/Observation
+   * transcript. Mirrored live into the trace as 'reason' steps; returned here
+   * for tests and interpretability.
+   */
+  react: ReActEntry[];
 }
 
 interface LoopState {
@@ -396,6 +418,8 @@ function buildResult(opts: {
   replyOverride?: string;
   distillable?: { reviewGap: string; refinementFix: string };
   coverage?: RequirementCoverage[];
+  acceptedAtThreshold?: boolean;
+  react?: ReActEntry[];
 }): AgentLoopResult {
   const editsApplied = summarizeArchitectureEdit(opts.original, opts.state);
   const rawGuidance = opts.draft?.rawGuidance ?? {};
@@ -423,6 +447,9 @@ function buildResult(opts: {
     unsatisfiable: opts.draft?.unsatisfiable ?? false,
     addRefIds: opts.draft?.addRefIds ?? [],
     coverage: opts.coverage ?? [],
+    coveragePercent: coveragePercent(opts.coverage ?? []),
+    ...(opts.acceptedAtThreshold ? { acceptedAtThreshold: true } : {}),
+    react: opts.react ?? [],
   };
 }
 
@@ -453,6 +480,24 @@ export async function runAgentLoop(input: AgentLoopInput, ctx: AgentLoopContext)
 
   const turnStart = Date.now();
   const timeRemaining = () => HARD_TIME_CAP_MS - (Date.now() - turnStart);
+
+  // agentic-concepts (ReAct) — the loop's Thought/Action/Observation log.
+  // Each entry streams into the trace as a 'reason' step the moment it is
+  // appended, so the reasoning is live for the user and persisted on the run.
+  const ANALYST = agentById('requirements-analyst')!.label;
+  const ARCHITECT = agentById('architect')!.label;
+  const REVIEWER_AGENT = agentById('reviewer')!.label;
+  const COORDINATOR = agentById('coordinator')!.label;
+  const react = createReActLog((entry, i) =>
+    emitter.step(
+      `react:${i + 1}`,
+      'reason',
+      entry.iteration,
+      entry.phase === 'thought' ? 'Reasoning' : entry.phase === 'action' ? 'Choosing the next action' : 'Observing the result',
+      'done',
+      `${entry.agent}: ${entry.text}`
+    )
+  );
 
   // Phase: understand (FR-001). Best-effort — a failure here degrades to an
   // unrestricted scope rather than failing a turn that would otherwise succeed.
@@ -497,6 +542,15 @@ export async function runAgentLoop(input: AgentLoopInput, ctx: AgentLoopContext)
   // checklist just extracted. Fed to every planner round as explicit MUSTs and
   // to the reviewer for item-by-item grading.
   const requirementChecklist = input.brief ? input.brief.capabilities : understanding.capabilities;
+
+  // ReAct: the analyst states the plan before any action is taken.
+  react.thought(
+    ANALYST,
+    requirementChecklist.length > 0
+      ? `${requirementChecklist.length} requirement(s) to cover${understanding.changeScope.length > 0 ? `, scoped to ${understanding.changeScope.length} existing service(s)` : ''}. Plan: consult the official-guidance and knowledge action groups, then draft → validate → review item by item, refining until every requirement is met (accepting ≥${COVERAGE_TARGET_PERCENT}% coverage if the budget runs out first).`
+      : 'No explicit requirement checklist for this request — plan: draft from the request and official guidance, then review holistically.',
+    1
+  );
 
   if (await isStopRequested()) {
     return buildResult({ terminalStatus: 'stopped', iterations: 0, converged: false, original, state: original, draft: null, mcpCalls: [] });
@@ -581,6 +635,15 @@ export async function runAgentLoop(input: AgentLoopInput, ctx: AgentLoopContext)
     if (await isStopRequested()) {
       return buildResult({ terminalStatus: 'stopped', iterations: iteration - 1, converged: false, original, state, draft, mcpCalls: gathered.mcpCalls });
     }
+
+    // ReAct: the architect names the act (and, on refine passes, the reason).
+    react.action(
+      ARCHITECT,
+      iteration === 1
+        ? `drafting the architecture with the diagram-editing action group (plan_chunk), grounded in ${gathered.official ? 'official provider guidance' : 'catalog guidance'}${knowledgeBlock ? ' and stored house rules' : ''}`
+        : `refining the draft to close the review gaps: ${verdict.unmetCapabilities.slice(0, 3).join('; ') || 'see refinement instructions'}`,
+      iteration
+    );
 
     let draftResult: DraftResult;
     let stoppedMidRound = false;
@@ -819,7 +882,19 @@ export async function runAgentLoop(input: AgentLoopInput, ctx: AgentLoopContext)
         : coverageDetail
     );
 
+    // ReAct: what the review showed, and what the loop concludes from it.
+    react.observation(
+      REVIEWER_AGENT,
+      reviewVerdict.coverage.length > 0
+        ? `${coverageSummary(reviewVerdict.coverage)}${reviewVerdict.pass ? '' : ` — gaps: ${reviewVerdict.unmetCapabilities.slice(0, 3).join('; ')}`}`
+        : reviewVerdict.pass
+          ? 'review passed — all requested capabilities present'
+          : unmetSummary(reviewVerdict.unmetCapabilities),
+      iteration
+    );
+
     if (reviewVerdict.pass) {
+      react.thought(COORDINATOR, `review passed at iteration ${iteration} — accepting the design`, iteration);
       converged = true;
       break;
     }
@@ -832,6 +907,31 @@ export async function runAgentLoop(input: AgentLoopInput, ctx: AgentLoopContext)
     if (timeRemaining() < ABORT_THRESHOLD_MS) break; // best-effort — not enough time for another pass (FR-003)
   }
 
+  // agentic-concepts — coverage acceptance floor (lib/agent/coverage.ts): the
+  // loop always aims for a full pass, but when the iteration/time budget runs
+  // out, a final draft at or above the ≥COVERAGE_TARGET_PERCENT floor (80–90%
+  // band, default 85) is ACCEPTED as converged with its gaps named, instead of
+  // being delivered apologetically as best-effort. Below the floor it stays
+  // best-effort and the reply escalates to the human (HITL low_coverage).
+  let acceptedAtThreshold = false;
+  if (!converged && draft && !draft.unsatisfiable && verdict.coverage.length > 0) {
+    if (meetsCoverageTarget(verdict.coverage)) {
+      converged = true;
+      acceptedAtThreshold = true;
+      react.thought(
+        COORDINATOR,
+        `budget exhausted at ${coveragePercent(verdict.coverage)}% coverage — meets the ≥${COVERAGE_TARGET_PERCENT}% acceptance target, so accepting the design with the remaining gap(s) noted`,
+        iterations
+      );
+    } else {
+      react.thought(
+        COORDINATOR,
+        `budget exhausted at ${coveragePercent(verdict.coverage)}% coverage — below the ≥${COVERAGE_TARGET_PERCENT}% target; escalating to the user instead of presenting this as done`,
+        iterations
+      );
+    }
+  }
+
   // 008 FR-022 — reinforce only the rules that were present in a turn that
   // actually PASSED review. A lesson that keeps appearing in failing turns is
   // not earning its place and decays out of retrieval on its own, which is what
@@ -841,8 +941,18 @@ export async function runAgentLoop(input: AgentLoopInput, ctx: AgentLoopContext)
   }
 
   let replyOverride: string | undefined;
-  if (draft && !draft.unsatisfiable && !converged && verdict.unmetCapabilities.length > 0) {
-    replyOverride = `${draft.reply}\n\nNote: this is the best design I could produce within the iteration budget. Still ${unmetSummary(verdict.unmetCapabilities)}.`;
+  if (draft && !draft.unsatisfiable && acceptedAtThreshold) {
+    const gaps = unmetRequirements(verdict.coverage);
+    replyOverride = `${draft.reply}\n\nRequirements check: ${coverageSummary(verdict.coverage)} — meets the ≥${COVERAGE_TARGET_PERCENT}% acceptance target. Outstanding: ${gaps.slice(0, 4).join('; ')}. Tell me if you want these closed too.`;
+  } else if (draft && !draft.unsatisfiable && !converged && verdict.unmetCapabilities.length > 0) {
+    // HITL low_coverage escalation: the best-effort draft is delivered, but the
+    // turn ends by asking the human how to proceed rather than declaring done.
+    const escalation =
+      verdict.coverage.length > 0
+        ? lowCoverageCheckpoint(coveragePercent(verdict.coverage), COVERAGE_TARGET_PERCENT, unmetRequirements(verdict.coverage))
+        : null;
+    const base = `${draft.reply}\n\nNote: this is the best design I could produce within the iteration budget. Still ${unmetSummary(verdict.unmetCapabilities)}.`;
+    replyOverride = escalation ? `${base}\n\n${escalation.prompt}` : base;
   } else if (draft && !draft.unsatisfiable && converged && verdict.pass && verdict.coverage.length > 0) {
     // Coverage confirmation — the reviewer verified every extracted requirement
     // against the applied diagram, so say so explicitly.
@@ -861,6 +971,8 @@ export async function runAgentLoop(input: AgentLoopInput, ctx: AgentLoopContext)
     replyOverride,
     // The final verdict's per-requirement table — what the evaluation UI shows.
     coverage: verdict.coverage,
+    acceptedAtThreshold,
+    react: [...react.entries],
     // Only a turn that FAILED review then RECOVERED teaches anything.
     ...(converged && firstReviewGap && iterations > 1 && editsForLesson
       ? { distillable: { reviewGap: firstReviewGap, refinementFix: editsForLesson } }

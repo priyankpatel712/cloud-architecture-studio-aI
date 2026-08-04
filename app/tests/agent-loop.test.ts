@@ -173,6 +173,74 @@ describe('runAgentLoop', () => {
     expect(reviewCalls).toHaveLength(3);
   });
 
+  it('accepts a budget-exhausted draft at ≥85% coverage as converged, naming the gaps (agentic-concepts acceptance floor)', async () => {
+    // 6 of 7 met = 86% — above the 85% floor but not a full pass. The loop
+    // still spends its whole budget chasing 100%, then accepts instead of
+    // delivering the same design apologetically as best-effort.
+    const coverage = [
+      ...Array.from({ length: 6 }, (_, i) => ({ requirement: `capability ${i}`, met: true, evidence: `svc-${i}`, gap: '' })),
+      { requirement: 'a WAF', met: false, evidence: '', gap: 'No WAF present.' },
+    ];
+    mockBySystemPrompt([
+      { match: 'cloud architecture assistant', respond: () => basePlan() },
+      { match: 'quality reviewer', respond: () => ({ ...failVerdict(['WAF'], 'Add a WAF.'), coverage }) },
+    ]);
+    const result = await runAgentLoop(emptyInput, makeCtx());
+    expect(result.iterations).toBe(3); // budget still fully spent aiming for 100%
+    expect(result.converged).toBe(true);
+    expect(result.terminalStatus).toBe('converged');
+    expect(result.acceptedAtThreshold).toBe(true);
+    expect(result.coveragePercent).toBe(86);
+    expect(result.reply).toContain('86%');
+    expect(result.reply).toContain('≥85%');
+    expect(result.reply).toContain('WAF');
+  });
+
+  it('escalates to the human when the budget ends below the coverage floor (HITL low_coverage)', async () => {
+    const coverage = [
+      { requirement: 'an API', met: true, evidence: 'svc-1', gap: '' },
+      { requirement: 'a WAF', met: false, evidence: '', gap: 'No WAF.' },
+      { requirement: 'multi-AZ', met: false, evidence: '', gap: 'Single AZ.' },
+    ];
+    mockBySystemPrompt([
+      { match: 'cloud architecture assistant', respond: () => basePlan() },
+      { match: 'quality reviewer', respond: () => ({ ...failVerdict(['WAF', 'multi-AZ'], 'Add both.'), coverage }) },
+    ]);
+    const result = await runAgentLoop(emptyInput, makeCtx());
+    expect(result.converged).toBe(false);
+    expect(result.terminalStatus).toBe('best_effort');
+    expect(result.acceptedAtThreshold).toBeUndefined();
+    expect(result.coveragePercent).toBe(33);
+    // The reply must ask how to proceed, not present the result as done.
+    expect(result.reply).toContain('below my 85% acceptance target');
+    expect(result.reply.toLowerCase()).toContain('tell me how to proceed');
+  });
+
+  it('emits a ReAct transcript — thought, action per iteration, observation per review (agentic-concepts)', async () => {
+    let call = 0;
+    mockBySystemPrompt([
+      { match: 'cloud architecture assistant', respond: () => basePlan() },
+      {
+        match: 'quality reviewer',
+        respond: () => {
+          call++;
+          return call === 1 ? failVerdict(['WAF'], 'Add a WAF.') : passVerdict;
+        },
+      },
+    ]);
+    const ctx = makeCtx();
+    const result = await runAgentLoop(emptyInput, ctx);
+    const phases = result.react.map((e) => e.phase);
+    expect(phases[0]).toBe('thought'); // the analyst's plan
+    expect(phases).toContain('action'); // the architect's draft/refine
+    expect(phases).toContain('observation'); // the reviewer's verdict
+    // The refine action names the gap it is closing (Reason half of ReAct).
+    const refineAction = result.react.find((e) => e.phase === 'action' && e.iteration === 2);
+    expect(refineAction?.text).toContain('WAF');
+    // Mirrored into the trace as 'reason' steps for the working-trace UI.
+    expect(ctx.emitter.steps.some((s) => s.kind === 'reason')).toBe(true);
+  });
+
   it('feeds the review refinementInstructions into the next draft pass (research R2)', async () => {
     let call = 0;
     mockBySystemPrompt([

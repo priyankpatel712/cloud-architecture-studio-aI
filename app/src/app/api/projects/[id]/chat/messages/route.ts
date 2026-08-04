@@ -45,6 +45,15 @@ import {
   type ValidationQuestion,
 } from '@/lib/generate/flow';
 import { detectSwitchIntent, generateCostQuestions, generatePricingOptions, applyOptionToNodes } from '@/lib/generate/cost-options';
+import {
+  buildApprovalQuestion,
+  decisionFromAnswers,
+  destructiveChangeCheckpoint,
+  interpretApprovalReply,
+  type HitlCheckpoint,
+} from '@/lib/agent/hitl';
+import { coveragePercent, coverageSummary } from '@/lib/agent/coverage';
+import { deriveBriefMemory, mergeSessionMemory, renderSessionMemory, type SessionMemoryEntry } from '@/lib/agent/session-memory';
 import { finalizeArchitecture, type PreservedNode } from '@/lib/generate/finalize';
 import { assignEdgeSides } from '@/lib/generate/edge-sides';
 import { priceNodes } from '@/lib/pricing';
@@ -214,13 +223,20 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
     // `editsApplied` and the "Direct canvas edit" system messages are exactly
     // what a follow-up needs to resolve against, and dropping them is root cause
     // R1/R2/R5 of modification requests being misunderstood.
-    const conversationContext = buildConversationContext(
+    //
+    // agentic-concepts (Session Memory): the durable per-conversation facts are
+    // prepended so a constraint stated in turn 2 still binds the planner in
+    // turn 30, after the transcript window has long since evicted it. Every
+    // consumer of conversationContext (intent, analyze, planner) sees both.
+    const transcriptBlock = buildConversationContext(
       convo.messages.map((m) => ({
         role: m.role as 'user' | 'assistant' | 'system',
         text: m.text ?? undefined,
         editsApplied: (m.editsApplied ?? []) as string[],
       }))
     );
+    const memoryBlock = renderSessionMemory((convo.sessionMemory ?? []) as SessionMemoryEntry[]);
+    const conversationContext = [memoryBlock, transcriptBlock].filter(Boolean).join('\n\n');
 
     convo.set('activeTools', activeTools);
     convo.set('designMode', designMode);
@@ -342,6 +358,41 @@ interface TurnCtx {
 }
 
 type FlowPhase = 'analyze' | 'build' | 'cost' | 'finalize';
+
+// ---- agentic-concepts: session memory + HITL pending-apply -----------------------
+
+/**
+ * Session Memory — merge this turn's durable facts into the conversation's
+ * stored entries. The mutation rides on whichever convo.save() ends the turn,
+ * so no extra write sits on the latency path.
+ */
+function recordSessionMemory(ctx: TurnCtx, entries: SessionMemoryEntry[]) {
+  if (entries.length === 0) return;
+  const merged = mergeSessionMemory((ctx.convo.sessionMemory ?? []) as SessionMemoryEntry[], entries);
+  ctx.convo.set('sessionMemory', merged);
+  ctx.convo.markModified('sessionMemory');
+}
+
+/**
+ * HITL destructive_change — the loop result held back at the approval
+ * checkpoint, stored wholesale on flow.pendingApply (Mixed) and re-read by
+ * runApplyPendingTurn when the user approves.
+ */
+interface PendingApply {
+  reason: string;
+  reply: string;
+  nodes: ArchNode[];
+  edges: ArchEdge[];
+  containers: ArchContainer[];
+  annotations: ArchAnnotation[];
+  guidance: AgentLoopResult['guidance'];
+  editsApplied: string[];
+  mcpCalls: { provider: ProviderId; tool: string; status: 'ok' | 'failed' }[];
+  coverage: RequirementCoverage[];
+  indicative: boolean;
+  iterations: number;
+  converged: boolean;
+}
 
 // ---- Shared persistence helpers -------------------------------------------------
 
@@ -501,7 +552,7 @@ function preservedFromArch(arch: ArchitectureDoc | null): PreservedNode[] {
 async function endTurnWithRound(ctx: TurnCtx, opts: {
   replyText: string;
   interaction: Interaction;
-  awaiting: 'clarify' | 'cost_questions' | 'cost_options';
+  awaiting: 'clarify' | 'cost_questions' | 'cost_options' | 'approval';
   flowPhase: FlowPhase;
   /** included when the turn also changed the architecture (build turn) */
   architecture?: Record<string, unknown>;
@@ -691,8 +742,11 @@ async function runDirectEditTurn(ctx: TurnCtx, edit: { arch: DirectEditArch; edi
     guidance: (arch?.guidance ?? {}) as never,
     editsApplied: edit.editsApplied,
     mcpCalls: [],
-    // A deterministic edit runs no review — there is no coverage to report.
+    // A deterministic edit runs no review — there is no coverage to report,
+    // no checklist to measure (100 by definition), and no ReAct reasoning.
     coverage: [],
+    coveragePercent: 100,
+    react: [],
     indicative: false,
     changed: edit.editsApplied.length > 0,
     unsatisfiable: false,
@@ -744,6 +798,165 @@ async function runDirectEditTurn(ctx: TurnCtx, edit: { arch: DirectEditArch; edi
   });
 }
 
+// ---- agentic-concepts: HITL approval checkpoint turns ---------------------------
+
+/**
+ * HITL destructive_change — end the turn WITHOUT persisting: the draft is held
+ * on flow.pendingApply and an approval round opens. The interaction reuses the
+ * 'clarify' card (zero new client UI); flow.awaiting = 'approval' is what
+ * routes the user's next message through the decision paths below.
+ */
+async function runApprovalRequestTurn(ctx: TurnCtx, result: AgentLoopResult, checkpoint: HitlCheckpoint, flowPhase: FlowPhase) {
+  const { convo, emitter, arch } = ctx;
+  emitter.step('hitl', 'reason', result.iterations, 'Pausing for your approval', 'done', checkpoint.reason);
+
+  if (!convo.flow) {
+    convo.set('flow', {
+      awaiting: null, openInteractionId: null, preservedNodes: preservedFromArch(arch),
+      pricingOptions: [], selectedOptionId: null, updatedAt: new Date(),
+    });
+  }
+  const pending: PendingApply = JSON.parse(JSON.stringify({
+    reason: checkpoint.reason,
+    reply: result.reply,
+    nodes: result.nodes,
+    edges: result.edges,
+    containers: result.containers,
+    annotations: result.annotations,
+    guidance: result.guidance,
+    editsApplied: result.editsApplied,
+    mcpCalls: result.mcpCalls,
+    coverage: result.coverage,
+    indicative: result.indicative,
+    iterations: result.iterations,
+    converged: result.converged,
+  }));
+  convo.set('flow.pendingApply', pending);
+  convo.markModified('flow');
+
+  const interaction = openInteraction('clarify', [buildApprovalQuestion(checkpoint)]);
+  return endTurnWithRound(ctx, {
+    replyText: `${result.reply}\n\n**Approval needed:** ${checkpoint.prompt} Nothing has been changed yet — your current diagram is untouched until you confirm.`,
+    interaction,
+    awaiting: 'approval',
+    flowPhase,
+    mcpCalls: result.mcpCalls,
+    indicative: result.indicative,
+    iterations: result.iterations,
+    converged: result.converged,
+    coverage: result.coverage,
+  });
+}
+
+/** The user approved — apply the held draft exactly as reviewed, then clear the checkpoint. */
+async function runApplyPendingTurn(ctx: TurnCtx) {
+  const { convo, project, emitter } = ctx;
+  const pending = (convo.flow?.pendingApply ?? null) as PendingApply | null;
+  if (!pending) {
+    convo.set('flow.awaiting', null);
+    convo.set('flow.openInteractionId', null);
+    convo.markModified('flow');
+    return endTurnWithAnswer(ctx, {
+      replyText: 'There is no pending change to apply — it may have been superseded. Tell me what you would like me to do.',
+    });
+  }
+
+  emitter.step('hitl', 'reason', 1, 'Applying the change you approved', 'running');
+  const resultLike: AgentLoopResult = {
+    terminalStatus: 'converged',
+    iterations: pending.iterations ?? 1,
+    converged: true,
+    stopped: false,
+    reply: pending.reply ?? 'Applied the approved change.',
+    nodes: pending.nodes,
+    edges: pending.edges,
+    containers: pending.containers,
+    annotations: pending.annotations ?? [],
+    guidance: pending.guidance ?? {},
+    editsApplied: pending.editsApplied ?? [],
+    mcpCalls: pending.mcpCalls ?? [],
+    coverage: pending.coverage ?? [],
+    coveragePercent: coveragePercent(pending.coverage ?? []),
+    react: [],
+    indicative: pending.indicative ?? false,
+    changed: true,
+    unsatisfiable: false,
+    addRefIds: [],
+  };
+  const version = await persistArchitectureResult(ctx, resultLike);
+  const estimate = await recomputeProjectEstimate(project);
+  emitter.step('hitl', 'reason', 1, 'Applying the change you approved', 'done');
+
+  recordSessionMemory(ctx, [
+    { kind: 'decision', text: `Approved a change that ${pending.reason}`, turn: turnIndex(convo) },
+  ]);
+
+  emitter.finalize();
+  let runId: unknown;
+  try {
+    const run = await createRun({
+      convo, project, iterations: resultLike.iterations, converged: true, stopped: false,
+      terminalStatus: 'converged', startedAt: ctx.turnStartedAt, steps: emitter.steps, modelCalls: emitter.modelCalls, flowPhase: 'build',
+    });
+    runId = run._id;
+  } catch (persistError) {
+    console.error('[chat/messages] failed to persist run:', persistError);
+  }
+
+  const assistantMessage = {
+    role: 'assistant' as const,
+    text: 'Applied the change as approved.',
+    attachedTools: [] as ProviderId[],
+    mcpCalls: resultLike.mcpCalls,
+    editsApplied: resultLike.editsApplied,
+    indicative: resultLike.indicative,
+    ...(resultLike.coverage.length > 0 ? { coverage: resultLike.coverage } : {}),
+    ...(runId ? { runId, iterations: resultLike.iterations, converged: true, stopped: false, stepCount: emitter.steps.length } : {}),
+    createdAt: new Date(),
+  };
+  convo.messages.push(assistantMessage);
+  convo.set('flow.pendingApply', null);
+  convo.set('flow.awaiting', null);
+  convo.set('flow.openInteractionId', null);
+  convo.set('flow.updatedAt', new Date());
+  convo.status = 'idle';
+  convo.stopRequested = false;
+  convo.markModified('flow');
+  await convo.save();
+
+  ctx.emit({
+    type: 'result',
+    payload: {
+      message: assistantMessage,
+      architecture: {
+        nodes: resultLike.nodes, edges: resultLike.edges, containers: resultLike.containers,
+        annotations: resultLike.annotations, guidance: resultLike.guidance, version,
+      },
+      estimate,
+      conversation: { status: 'idle', activeTools: ctx.activeTools },
+      flow: flowSnapshot(convo),
+    },
+  });
+}
+
+/** The user declined — discard the held draft; the current diagram stays exactly as it is. */
+async function runDiscardPendingTurn(ctx: TurnCtx) {
+  const { convo, emitter } = ctx;
+  emitter.step('hitl', 'reason', 1, 'Checkpoint resolved — keeping the current diagram', 'done');
+  recordSessionMemory(ctx, [
+    { kind: 'decision', text: 'Rejected a destructive change at the approval checkpoint — current diagram kept', turn: turnIndex(convo) },
+  ]);
+  convo.set('flow.pendingApply', null);
+  convo.set('flow.awaiting', null);
+  convo.set('flow.openInteractionId', null);
+  convo.set('flow.updatedAt', new Date());
+  convo.markModified('flow');
+  return endTurnWithAnswer(ctx, {
+    replyText:
+      'Understood — I have kept your current diagram exactly as it is; the proposed change was discarded. Tell me if you would like a different approach.',
+  });
+}
+
 /**
  * 008 FR-020/FR-021 — distil a reusable lesson from this turn's review→fix pair
  * and store it, then surface it as a trailing `distill` trace step.
@@ -786,6 +999,30 @@ async function routeTurn(ctx: TurnCtx) {
       `${modeLabel} — ${activeTools.map((t) => getProvider(t).label).join(' + ')}${ctx.routeReason ? ` · ${ctx.routeReason}` : ''}`);
   }
 
+  // agentic-concepts (HITL) — an open approval checkpoint is resolved FIRST:
+  // approve applies the held draft, reject discards it, and anything unclear is
+  // treated as a new request that supersedes the checkpoint (nothing applied —
+  // the checkpoint fails safe, never destructive).
+  if (awaiting === 'approval' && openRound) {
+    const decision = ir
+      ? decisionFromAnswers(ir.answers as InteractionAnswer[], ir.skipAll)
+      : interpretApprovalReply(ctx.userText);
+    if (decision === 'approve') {
+      closeStoredRound(convo, openRound.id, 'answered');
+      return runApplyPendingTurn(ctx);
+    }
+    if (decision === 'reject') {
+      closeStoredRound(convo, openRound.id, ir?.skipAll ? 'skipped' : 'answered');
+      return runDiscardPendingTurn(ctx);
+    }
+    closeStoredRound(convo, openRound.id, 'superseded');
+    convo.set('flow.pendingApply', null);
+    convo.set('flow.awaiting', null);
+    convo.set('flow.openInteractionId', null);
+    convo.markModified('flow');
+    // fall through — the message routes as a normal request below.
+  }
+
   // Structured responses to open rounds.
   if (ir && openRound && awaiting === 'clarify') {
     const resolved = resolveQuestions(openRound.questions, ir.answers, ir.skipAll);
@@ -810,8 +1047,9 @@ async function routeTurn(ctx: TurnCtx) {
     return runApplyFinalizeTurn(ctx, ir.skipAll ? null : (ir.selectedOptionId ?? null));
   }
 
-  // Free text while a round is open (research D8).
-  if (!ir && awaiting && openRound) return routeFreeTextDuringRound(ctx, awaiting, openRound);
+  // Free text while a round is open (research D8). An approval round never
+  // reaches here — it was fully resolved (or superseded) above.
+  if (!ir && awaiting && awaiting !== 'approval' && openRound) return routeFreeTextDuringRound(ctx, awaiting, openRound);
 
   // No open round. Switch intent on a completed flow (FR-011)?
   const storedOptions = (convo.flow?.pricingOptions ?? []) as unknown as PricingOption[];
@@ -1176,12 +1414,34 @@ async function runBuildTurn(ctx: TurnCtx, brief: RequirementBrief, analysisPream
     return persistStoppedLoop(ctx, result);
   }
 
+  // agentic-concepts (HITL destructive_change) — a draft that removes a
+  // meaningful share of the existing diagram is held for approval, never
+  // auto-applied. Checked BEFORE persistence on purpose: the checkpoint's
+  // whole value is that nothing has been written when the question is asked.
+  if (result.changed && !result.unsatisfiable) {
+    const checkpoint = destructiveChangeCheckpoint(
+      (arch?.nodes ?? []) as unknown as { nodeId: string; serviceId?: string; displayName?: string }[],
+      result.nodes
+    );
+    if (checkpoint) return runApprovalRequestTurn(ctx, result, checkpoint, 'build');
+  }
+
   // Persist the updated architecture (unchanged 003/004 semantics).
   const version = await persistArchitectureResult(ctx, result);
 
   if (result.unsatisfiable) {
     return emitUnsatisfiable(ctx, result, version, 'build');
   }
+
+  // agentic-concepts (Session Memory) — this turn's durable facts: the brief's
+  // constraints/assumptions/selections plus the coverage outcome. Rides on
+  // whichever save() ends the turn.
+  recordSessionMemory(ctx, [
+    ...deriveBriefMemory(brief, turnIndex(convo)),
+    ...(result.coverage.length > 0
+      ? [{ kind: 'outcome' as const, text: `Turn ${turnIndex(convo)}: ${coverageSummary(result.coverage)}`, turn: turnIndex(convo) }]
+      : []),
+  ]);
 
   const estimate = result.changed ? await recomputeProjectEstimate(project) : null;
   const disclosure = defaultsDisclosure(brief);
@@ -1492,6 +1752,13 @@ async function runApplyFinalizeTurn(
     createdAt: new Date(),
   };
   convo.messages.push(assistantMessage);
+  // agentic-concepts (Session Memory) — the chosen pricing configuration is a
+  // durable decision future turns must keep honoring.
+  if (option) {
+    recordSessionMemory(ctx, [
+      { kind: 'decision', text: `Applied the ${option.label} pricing configuration (~$${estimate.monthly}/mo)`, turn: turnIndex(convo) },
+    ]);
+  }
   convo.set('flow.awaiting', null);
   convo.set('flow.openInteractionId', null);
   convo.set('flow.selectedOptionId', option?.id ?? null);
@@ -1582,6 +1849,9 @@ async function runSwitchTurn(ctx: TurnCtx, option: PricingOption) {
     createdAt: new Date(),
   };
   convo.messages.push(assistantMessage);
+  recordSessionMemory(ctx, [
+    { kind: 'decision', text: `Switched to the ${option.label} pricing configuration (~$${estimate.monthly}/mo)`, turn: turnIndex(convo) },
+  ]);
   convo.set('flow.selectedOptionId', option.id);
   convo.set('flow.updatedAt', new Date());
   convo.status = 'idle';
@@ -1761,7 +2031,25 @@ async function runLegacyTurn(ctx: TurnCtx, brief: RequirementBrief | null, opts?
     return persistStoppedLoop(ctx, result);
   }
 
+  // agentic-concepts (HITL destructive_change) — same approval gate as the
+  // guided build turn: held, never auto-applied.
+  if (result.changed && !result.unsatisfiable) {
+    const checkpoint = destructiveChangeCheckpoint(
+      (arch?.nodes ?? []) as unknown as { nodeId: string; serviceId?: string; displayName?: string }[],
+      result.nodes
+    );
+    if (checkpoint) return runApprovalRequestTurn(ctx, result, checkpoint, 'build');
+  }
+
   const version = await persistArchitectureResult(ctx, result);
+
+  // agentic-concepts (Session Memory) — durable facts from this turn.
+  recordSessionMemory(ctx, [
+    ...(brief ? deriveBriefMemory(brief, turnIndex(convo)) : []),
+    ...(result.coverage.length > 0
+      ? [{ kind: 'outcome' as const, text: `Turn ${turnIndex(convo)}: ${coverageSummary(result.coverage)}`, turn: turnIndex(convo) }]
+      : []),
+  ]);
 
   // Cost phase (003 FR-006/FR-008a) — unchanged for legacy/small-edit turns.
   let estimate: Awaited<ReturnType<typeof recomputeProjectEstimate>> | null = null;

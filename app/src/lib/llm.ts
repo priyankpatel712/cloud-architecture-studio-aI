@@ -701,10 +701,11 @@ async function callBedrock(cfg: LlmRuntimeConfig, opts: CompletionOpts): Promise
     if (raw) console.error(`[llm] bedrock ${res.status} error body:`, raw.slice(0, 2000));
     if (res.status === 401) throw new LlmError(BAD_KEY_MESSAGE, false);
     if (res.status === 403) {
-      // AccessDeniedException covers both a rejected bearer token and a model
-      // the account has not been granted — both need the operator, not a retry.
+      // AccessDeniedException covers a rejected/expired bearer token, a
+      // region mismatch (short-term Bedrock API keys are region-scoped), and
+      // a model the account has not been granted — all need the operator.
       throw new LlmError(
-        `Bedrock rejected the request (403) — check the API key and that access to "${cfg.model}" is enabled in the Bedrock console (Model access).`,
+        `Bedrock rejected the request (403) in ${bedrockRegion()} — the API key may be expired (short-term keys last up to 12h and die with the sandbox session), issued for a different region than ${bedrockRegion()} (set AWS_BEDROCK_REGION), or access to "${cfg.model}" is not enabled (Bedrock console → Model access).`,
         false
       );
     }

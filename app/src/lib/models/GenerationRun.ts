@@ -15,12 +15,13 @@ const traceStepSchema = new Schema(
       type: String,
       // 006 adds 'analyze' | 'options' | 'finalize' (guided flow phases); 008 adds
       // 'intent' | 'direct-edit' | 'knowledge' | 'research' | 'distill' (multi-agent
-      // steps) — keep in sync with trace-emitter.ts StepKind. A kind missing here
+      // steps); agentic-concepts adds 'reason' (ReAct thought/action/observation)
+      // — keep in sync with trace-emitter.ts StepKind. A kind missing here
       // makes the whole run fail to persist, losing the trace for the turn.
       enum: [
         'understand', 'lookup', 'draft', 'review', 'refine', 'layout', 'price',
         'validate', 'persist', 'cost', 'analyze', 'options', 'finalize',
-        'intent', 'direct-edit', 'knowledge', 'research', 'distill',
+        'intent', 'direct-edit', 'knowledge', 'research', 'distill', 'reason',
       ],
       required: true,
     },

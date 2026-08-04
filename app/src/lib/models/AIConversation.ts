@@ -153,9 +153,19 @@ const briefSchema = new Schema(
  */
 const flowSchema = new Schema(
   {
-    awaiting: { type: String, enum: ['clarify', 'cost_questions', 'cost_options', null], default: null },
+    // agentic-concepts adds 'approval' — a human-in-the-loop checkpoint round
+    // (lib/agent/hitl.ts): a destructive draft is held in `pendingApply` below
+    // and applied/discarded by the user's next message, never automatically.
+    awaiting: { type: String, enum: ['clarify', 'cost_questions', 'cost_options', 'approval', null], default: null },
     brief: { type: briefSchema, default: undefined },
     openInteractionId: { type: String, default: null },
+    /**
+     * agentic-concepts (HITL) — the full loop result held back at the approval
+     * checkpoint: nodes/edges/containers/annotations/guidance plus the message
+     * metadata (reply, editsApplied, coverage, mcpCalls). Mixed on purpose: it
+     * is written and read wholesale by the messages route, never queried.
+     */
+    pendingApply: { type: Schema.Types.Mixed, default: undefined },
     /**
      * Position snapshot of nodes present BEFORE the guided build — the finalize
      * pass restores these (when the node's container membership is unchanged)
@@ -265,6 +275,21 @@ const conversationSchema = new Schema(
     stopRequested: { type: Boolean, default: false },
     /** 006 — guided-flow state machine (data-model.md §1/§4); absent on legacy threads */
     flow: { type: flowSchema, default: undefined },
+    /**
+     * agentic-concepts (Session Memory, lib/agent/session-memory.ts) — durable
+     * per-conversation facts (decisions, constraints, preferences, the latest
+     * coverage outcome) that survive the transcript window's char budget.
+     * Derived deterministically each turn; rendered into every stage's
+     * conversation context. Absent on legacy threads — no migration.
+     */
+    sessionMemory: {
+      type: [new Schema({
+        kind: { type: String, enum: ['decision', 'preference', 'constraint', 'outcome'], required: true },
+        text: { type: String, required: true },
+        turn: { type: Number, required: true },
+      }, { _id: false })],
+      default: [],
+    },
     messages: { type: [messageSchema], default: [] },
   },
   { timestamps: true }
