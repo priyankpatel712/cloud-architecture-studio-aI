@@ -12,6 +12,9 @@ export const LLM_PROVIDER_IDS = [
   'openrouter',
   'huggingface',
   'anthropic',
+  // Appended last deliberately: resolveLlmConfigs iterates this order to build
+  // the fallback chain, so a new provider must not displace existing ones.
+  'bedrock',
 ] as const;
 
 export type LlmProviderId = (typeof LLM_PROVIDER_IDS)[number];
@@ -169,6 +172,37 @@ export const LLM_PROVIDERS: Record<LlmProviderId, LlmProviderInfo> = {
     },
     keyEnv: 'ANTHROPIC_API_KEY',
     keyUrl: 'https://console.anthropic.com/settings/keys',
+  },
+  bedrock: {
+    id: 'bedrock',
+    label: 'AWS Bedrock',
+    blurb:
+      'Amazon Bedrock via a Bedrock API key (bearer auth, Converse API). Region comes from AWS_BEDROCK_REGION / AWS_REGION (default us-east-1).',
+    // Anthropic models on Bedrock require the cross-region inference profile id
+    // (`us.` prefix) for on-demand invocation — the bare `anthropic.…` ids from
+    // the model listing 400 with "on-demand throughput isn't supported". The
+    // settings UI overlays this list with the account's live listing (foundation
+    // models + inference profiles), so what the sandbox actually serves wins.
+    defaultModel: 'us.anthropic.claude-sonnet-4-5-20250929-v1:0',
+    models: [
+      'us.anthropic.claude-sonnet-4-5-20250929-v1:0',
+      'us.anthropic.claude-haiku-4-5-20251001-v1:0',
+      'us.amazon.nova-pro-v1:0',
+      'us.amazon.nova-lite-v1:0',
+      'us.meta.llama3-3-70b-instruct-v1:0',
+    ],
+    modelInfo: {
+      'us.anthropic.claude-sonnet-4-5-20250929-v1:0': { id: 'us.anthropic.claude-sonnet-4-5-20250929-v1:0', tier: 'large', ctx: 200000, multimodal: true },
+      'us.anthropic.claude-haiku-4-5-20251001-v1:0': { id: 'us.anthropic.claude-haiku-4-5-20251001-v1:0', tier: 'small', ctx: 200000, multimodal: true },
+      'us.amazon.nova-pro-v1:0': { id: 'us.amazon.nova-pro-v1:0', tier: 'mid', ctx: 300000, multimodal: true },
+      'us.amazon.nova-lite-v1:0': { id: 'us.amazon.nova-lite-v1:0', tier: 'small', ctx: 300000, multimodal: true },
+      'us.meta.llama3-3-70b-instruct-v1:0': { id: 'us.meta.llama3-3-70b-instruct-v1:0', tier: 'mid', ctx: 128000, multimodal: false },
+    },
+    keyEnv: 'AWS_BEDROCK_API_KEY',
+    // AWS's own env var name for Bedrock API keys, honoured as an alias so a
+    // key exported for the AWS CLI/SDK works here unchanged.
+    keyEnvAliases: ['AWS_BEARER_TOKEN_BEDROCK'],
+    keyUrl: 'https://console.aws.amazon.com/bedrock/home#/api-keys',
   },
 };
 

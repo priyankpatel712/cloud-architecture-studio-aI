@@ -256,6 +256,15 @@ export const profilePatchSchema = z.object({
 export const llmProviderIdSchema = z.enum([...LLM_PROVIDER_IDS]);
 
 /**
+ * Upper bound for a pasted provider API key. Most providers issue keys well
+ * under 200 chars, but AWS Bedrock short-term API keys embed a whole session
+ * token and routinely exceed 1,000 chars (observed live: a valid sandbox key
+ * rejected by the previous 500-char cap). The bound exists only to keep
+ * obviously-wrong pastes (a whole config file) out of the encrypted store.
+ */
+const LLM_API_KEY_MAX = 8192;
+
+/**
  * PUT /api/settings/llm — app-wide AI provider config (Settings → AI Provider).
  * `apiKey` is write-only: blank keeps the stored key, `clearKey` removes it.
  */
@@ -263,7 +272,7 @@ export const llmSettingsPutSchema = z
   .object({
     provider: llmProviderIdSchema,
     model: z.string().max(200).optional().default(''),
-    apiKey: z.string().max(500).optional().default(''),
+    apiKey: z.string().max(LLM_API_KEY_MAX).optional().default(''),
     clearKey: z.boolean().optional().default(false),
     /** 008 FR-016 — tiering toggle and per-role model assignments live with the
      * rest of the AI config, not in env. */
@@ -290,13 +299,13 @@ export const llmSettingsPutSchema = z
 export const llmSettingsTestSchema = z.object({
   provider: llmProviderIdSchema,
   model: z.string().max(200).optional().default(''),
-  apiKey: z.string().max(500).optional().default(''),
+  apiKey: z.string().max(LLM_API_KEY_MAX).optional().default(''),
 });
 
 /** POST /api/settings/llm/models — list the provider's live model ids. */
 export const llmModelsListSchema = z.object({
   provider: llmProviderIdSchema,
-  apiKey: z.string().max(500).optional().default(''),
+  apiKey: z.string().max(LLM_API_KEY_MAX).optional().default(''),
 });
 
 // ---------------------------------------------------------------------------

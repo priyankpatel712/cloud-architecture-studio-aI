@@ -12,14 +12,17 @@ import { selectRoleChain, resolveRoleTiering, LLM_ROLES, ROLE_TIERS, type LlmRol
  * model, and API key resolve from the in-app settings (Settings → AI Provider,
  * stored encrypted in the LlmSettings collection) with the LLM_* env vars as
  * fallback: LLM_PROVIDER (anthropic | groq | nvidia | gemini | openrouter |
- * huggingface), LLM_MODEL, LLM_API_KEY (or the provider-specific key env named
- * in lib/llm-catalog.ts). When no key resolves the orchestrator runs in the
- * clearly-labelled indicative degraded mode (spec Assumptions) — `llmAvailable()`
- * lets callers branch.
+ * huggingface | bedrock), LLM_MODEL, LLM_API_KEY (or the provider-specific key
+ * env named in lib/llm-catalog.ts). When no key resolves the orchestrator runs
+ * in the clearly-labelled indicative degraded mode (spec Assumptions) —
+ * `llmAvailable()` lets callers branch.
  *
  * Groq, NVIDIA (NIM), Gemini, OpenRouter, and Hugging Face all use their
  * OpenAI-compatible REST endpoints directly (no SDK dependency — a single
- * JSON-in/JSON-out call doesn't justify one, Constitution I). NVIDIA and Gemini
+ * JSON-in/JSON-out call doesn't justify one, Constitution I). AWS Bedrock uses
+ * its native Converse REST API with a Bedrock API key as a bearer token — the
+ * same single-secret shape as every other provider, so no AWS SDK or SigV4
+ * signing chain is needed. NVIDIA and Gemini
  * both get OpenAI-style strict `response_format: json_schema` so the schema is
  * enforced server-side, not just prompted; Groq and OpenRouter fall back to
  * prompted `json_object` mode, and Hugging Face is prompted-only (the router
@@ -29,13 +32,26 @@ import { selectRoleChain, resolveRoleTiering, LLM_ROLES, ROLE_TIERS, type LlmRol
 
 type Provider = LlmProviderId;
 
-const OPENAI_COMPAT_URL: Record<Exclude<Provider, 'anthropic'>, string> = {
+/** Providers served by the shared OpenAI-compatible transport below. */
+type OpenAiCompatProvider = Exclude<Provider, 'anthropic' | 'bedrock'>;
+
+const OPENAI_COMPAT_URL: Record<OpenAiCompatProvider, string> = {
   groq: 'https://api.groq.com/openai/v1/chat/completions',
   nvidia: 'https://integrate.api.nvidia.com/v1/chat/completions',
   gemini: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
   openrouter: 'https://openrouter.ai/api/v1/chat/completions',
   huggingface: 'https://router.huggingface.co/v1/chat/completions',
 };
+
+/**
+ * Bedrock is region-scoped; every other provider here is a single global host.
+ * The region is deployment configuration (like the key env), not per-user
+ * settings — AWS_BEDROCK_REGION wins so a dedicated value can coexist with a
+ * general-purpose AWS_REGION already set for other AWS tooling.
+ */
+function bedrockRegion(): string {
+  return process.env.AWS_BEDROCK_REGION || process.env.AWS_REGION || 'us-east-1';
+}
 
 /** The provider/model/key a call actually runs with, after settings+env resolution. */
 export interface LlmRuntimeConfig {
@@ -489,7 +505,7 @@ async function callAnthropic(cfg: LlmRuntimeConfig, opts: CompletionOpts): Promi
 }
 
 /** OpenRouter uses these purely for their own dashboard attribution/ranking. */
-function extraHeaders(p: Exclude<Provider, 'anthropic'>): Record<string, string> {
+function extraHeaders(p: OpenAiCompatProvider): Record<string, string> {
   return p === 'openrouter' ? { 'HTTP-Referer': 'https://localhost', 'X-Title': 'Cloud Architecture Studio' } : {};
 }
 
@@ -507,7 +523,7 @@ function extraHeaders(p: Exclude<Provider, 'anthropic'>): Record<string, string>
  * (verified against nemotron-super with nested schemas), so NVIDIA now uses the
  * same path as Gemini.
  */
-function structuredOutputParams(p: Exclude<Provider, 'anthropic'>, schema: Record<string, unknown>): Record<string, unknown> {
+function structuredOutputParams(p: OpenAiCompatProvider, schema: Record<string, unknown>): Record<string, unknown> {
   if (p === 'nvidia' || p === 'gemini') {
     return { response_format: { type: 'json_schema', json_schema: { name: 'response', strict: true, schema } } };
   }
@@ -517,7 +533,7 @@ function structuredOutputParams(p: Exclude<Provider, 'anthropic'>, schema: Recor
 
 /** OpenAI-compatible chat completions (Groq, NVIDIA NIM, Gemini, OpenRouter, Hugging Face) with structured-output JSON. */
 async function callOpenAiCompatible(cfg: LlmRuntimeConfig, opts: CompletionOpts): Promise<string> {
-  const p = cfg.provider as Exclude<Provider, 'anthropic'>;
+  const p = cfg.provider as OpenAiCompatProvider;
   const to = withTimeout(opts.signal, LLM_TIMEOUT_MS);
   let res: Response;
   try {
@@ -632,6 +648,117 @@ async function callOpenAiCompatible(cfg: LlmRuntimeConfig, opts: CompletionOpts)
 }
 
 /**
+ * AWS Bedrock via the Converse API (`POST /model/{id}/converse` on
+ * bedrock-runtime), authenticated with a Bedrock API key as a bearer token.
+ * Converse is model-agnostic, so one branch serves Anthropic, Amazon Nova,
+ * Meta, and every other Bedrock-hosted model the account has access to.
+ *
+ * Converse has no OpenAI-style `response_format`, so like Hugging Face this is
+ * prompted-only JSON: the schema is embedded in the system prompt and
+ * extractJson/JSON.parse in completeOnce stay the correctness gate.
+ */
+async function callBedrock(cfg: LlmRuntimeConfig, opts: CompletionOpts): Promise<string> {
+  const to = withTimeout(opts.signal, LLM_TIMEOUT_MS);
+  const url = `https://bedrock-runtime.${bedrockRegion()}.amazonaws.com/model/${encodeURIComponent(cfg.model)}/converse`;
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${cfg.apiKey}`,
+      },
+      body: JSON.stringify({
+        system: [
+          {
+            text: `${opts.system}\n\nYou MUST respond with a JSON object that adheres strictly to this JSON Schema:\n${JSON.stringify(opts.schema)}`,
+          },
+        ],
+        messages: [{ role: 'user', content: [{ text: opts.user }] }],
+        inferenceConfig: { maxTokens: opts.maxTokens ?? 8192 },
+      }),
+      signal: to.signal,
+    });
+  } catch {
+    const timedOut = to.timedOut();
+    to.cleanup();
+    if (opts.signal?.aborted) throw new LlmAbortError();
+    if (timedOut) throw new LlmError(TIMEOUT_MESSAGE, false, 'timeout');
+    throw new LlmError('Could not reach the LLM service.', true);
+  }
+  to.cleanup();
+
+  if (!res.ok) {
+    // Log the raw body server-side only (same information-leakage rule as the
+    // OpenAI-compatible transport); read it first because the status mapping
+    // below wants ValidationException's message shape.
+    let raw = '';
+    try {
+      raw = await res.text();
+    } catch {
+      /* ignore body read failures */
+    }
+    if (raw) console.error(`[llm] bedrock ${res.status} error body:`, raw.slice(0, 2000));
+    if (res.status === 401) throw new LlmError(BAD_KEY_MESSAGE, false);
+    if (res.status === 403) {
+      // AccessDeniedException covers both a rejected bearer token and a model
+      // the account has not been granted — both need the operator, not a retry.
+      throw new LlmError(
+        `Bedrock rejected the request (403) — check the API key and that access to "${cfg.model}" is enabled in the Bedrock console (Model access).`,
+        false
+      );
+    }
+    if (res.status === 429) {
+      const retryAfterMs = parseRetryAfterMs(res.headers.get('retry-after')) ?? undefined;
+      throw new LlmError(
+        'The assistant is rate-limited right now — try again shortly.',
+        true,
+        'rate_limited',
+        retryAfterMs
+      );
+    }
+    if (res.status === 404 || (res.status === 400 && /model identifier|isn't supported|is not supported|on-demand/i.test(raw))) {
+      // ResourceNotFoundException, an invalid model id, or a base model id that
+      // needs its `us.` inference profile — configuration errors, never retried.
+      throw new LlmError(
+        `The model "${cfg.model}" was not found on bedrock — Anthropic models usually need the cross-region inference profile id (us.…). Pick one of the available models in Settings → AI Provider.`,
+        false
+      );
+    }
+    if (res.status === 413) {
+      throw new LlmError(
+        `The request is too large for bedrock (${cfg.model}) — configure a larger-context provider in Settings → AI Provider.`,
+        false,
+        'too_large'
+      );
+    }
+    throw new LlmError(`LLM request failed (${res.status}).`, res.status >= 500);
+  }
+
+  const data = (await res.json()) as {
+    output?: { message?: { content?: { text?: string }[] } };
+    stopReason?: string;
+    usage?: { inputTokens?: number; outputTokens?: number };
+  };
+  // 008 FR-014 — Converse reports usage in camelCase.
+  lastUsage = {
+    promptTokens: data.usage?.inputTokens ?? 0,
+    completionTokens: data.usage?.outputTokens ?? 0,
+  };
+  if (data.stopReason === 'content_filtered' || data.stopReason === 'guardrail_intervened') {
+    throw new LlmError('The assistant declined this request.', false);
+  }
+  if (data.stopReason === 'max_tokens') {
+    throw new LlmError('The model response was cut off — try again.', true);
+  }
+  const text = (data.output?.message?.content ?? [])
+    .map((b) => b.text ?? '')
+    .join('');
+  if (!text) throw new LlmError('The assistant returned an empty response.', true);
+  return text;
+}
+
+/**
  * Reasoning models may wrap the JSON in <think> blocks or stray prose even
  * under guided decoding. Strip thinking tags, then slice from the first '{' to
  * the last '}' — the parse below stays the correctness gate.
@@ -714,9 +841,16 @@ function stripTrailingCommas(input: string): string {
   return out;
 }
 
+/** Route a completion to the transport that speaks the provider's protocol. */
+function callProvider(cfg: LlmRuntimeConfig, opts: CompletionOpts): Promise<string> {
+  if (cfg.provider === 'anthropic') return callAnthropic(cfg, opts);
+  if (cfg.provider === 'bedrock') return callBedrock(cfg, opts);
+  return callOpenAiCompatible(cfg, opts);
+}
+
 /** One raw completion + JSON parse against an explicit config. */
 async function completeOnce<T>(cfg: LlmRuntimeConfig, opts: CompletionOpts): Promise<T> {
-  const text = await (cfg.provider === 'anthropic' ? callAnthropic(cfg, opts) : callOpenAiCompatible(cfg, opts));
+  const text = await callProvider(cfg, opts);
   const extracted = extractJson(text);
   try {
     return JSON.parse(extracted) as T;
@@ -892,7 +1026,7 @@ export async function llmPing(cfg: LlmRuntimeConfig, signal?: AbortSignal): Prom
     maxTokens: 8192,
     signal,
   };
-  const text = await (cfg.provider === 'anthropic' ? callAnthropic(cfg, opts) : callOpenAiCompatible(cfg, opts));
+  const text = await callProvider(cfg, opts);
   try {
     JSON.parse(extractJson(text));
   } catch {
@@ -900,8 +1034,12 @@ export async function llmPing(cfg: LlmRuntimeConfig, signal?: AbortSignal): Prom
   }
 }
 
-/** Every provider's model-listing endpoint (OpenAI-style `GET /models`). */
-const MODELS_URL: Record<Provider, string> = {
+/**
+ * Every provider's model-listing endpoint (OpenAI-style `GET /models`).
+ * Bedrock is absent: its listing lives on the region-scoped control-plane host
+ * with a different response shape, handled by listBedrockModels below.
+ */
+const MODELS_URL: Record<Exclude<Provider, 'bedrock'>, string> = {
   groq: 'https://api.groq.com/openai/v1/models',
   nvidia: 'https://integrate.api.nvidia.com/v1/models',
   gemini: 'https://generativelanguage.googleapis.com/v1beta/openai/models',
@@ -909,6 +1047,54 @@ const MODELS_URL: Record<Provider, string> = {
   huggingface: 'https://router.huggingface.co/v1/models',
   anthropic: 'https://api.anthropic.com/v1/models',
 };
+
+/**
+ * Bedrock's catalog is two lists: foundation models (base `vendor.model` ids)
+ * and cross-region inference profiles (`us.vendor.model` ids). Newer Anthropic
+ * models can ONLY be invoked on-demand through a profile id, so returning just
+ * the foundation list would offer ids that 400 on every call. Profiles are
+ * merged in; a region/account without the profiles endpoint degrades to the
+ * foundation list rather than failing the whole listing.
+ */
+async function listBedrockModels(apiKey: string): Promise<string[]> {
+  const region = bedrockRegion();
+  const headers = { Authorization: `Bearer ${apiKey}` };
+  let res: Response;
+  try {
+    res = await fetch(`https://bedrock.${region}.amazonaws.com/foundation-models`, {
+      headers,
+      signal: AbortSignal.timeout(15_000),
+    });
+  } catch {
+    throw new LlmError('Could not reach the provider to list models.', true);
+  }
+  if (!res.ok) {
+    if (res.status === 401 || res.status === 403) throw new LlmError(BAD_KEY_MESSAGE, false);
+    throw new LlmError(`Model listing failed (${res.status}).`, res.status >= 500);
+  }
+  const data = (await res.json()) as { modelSummaries?: { modelId?: unknown }[] };
+  const ids = (data.modelSummaries ?? [])
+    .map((m) => m.modelId)
+    .filter((id): id is string => typeof id === 'string' && id.length > 0);
+
+  try {
+    const profRes = await fetch(`https://bedrock.${region}.amazonaws.com/inference-profiles`, {
+      headers,
+      signal: AbortSignal.timeout(15_000),
+    });
+    if (profRes.ok) {
+      const prof = (await profRes.json()) as {
+        inferenceProfileSummaries?: { inferenceProfileId?: unknown }[];
+      };
+      for (const p of prof.inferenceProfileSummaries ?? []) {
+        if (typeof p.inferenceProfileId === 'string' && p.inferenceProfileId) ids.push(p.inferenceProfileId);
+      }
+    }
+  } catch {
+    /* best-effort: profiles unavailable — the foundation list still stands */
+  }
+  return [...new Set(ids)].sort((a, b) => a.localeCompare(b));
+}
 
 /**
  * Live model ids from the provider itself — so the settings UI offers what the
@@ -920,6 +1106,7 @@ export async function llmListModels(cfg: { provider: Provider; apiKey?: string }
   if (!cfg.apiKey) {
     throw new LlmError('No API key — enter one or store it first.', false);
   }
+  if (cfg.provider === 'bedrock') return listBedrockModels(cfg.apiKey);
   const headers: Record<string, string> =
     cfg.provider === 'anthropic'
       ? { 'x-api-key': cfg.apiKey, 'anthropic-version': '2023-06-01' }

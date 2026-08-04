@@ -121,6 +121,10 @@ const TIER_PREFERENCES: Record<LlmModelTier, { provider: LlmProviderId; model: s
     // load this feature exists to remove.
     { provider: 'nvidia', model: 'meta/llama-3.1-8b-instruct' },
     { provider: 'gemini', model: 'gemini-2.5-flash' },
+    // Bedrock entries sit last in every tier: selectRoleChain skips providers
+    // without a key, so these are inert until a Bedrock key is configured and
+    // never displace the free-tier ordering tuned above.
+    { provider: 'bedrock', model: 'us.anthropic.claude-haiku-4-5-20251001-v1:0' },
   ],
   // Mid preferences must name models the catalog actually TAGS mid. The first
   // measured post-tiering run (post-tiering.json, 2026-08-01) had nvidia's
@@ -132,11 +136,13 @@ const TIER_PREFERENCES: Record<LlmModelTier, { provider: LlmProviderId; model: s
   mid: [
     { provider: 'groq', model: 'llama-3.3-70b-versatile' },
     { provider: 'huggingface', model: 'meta-llama/Llama-3.3-70B-Instruct' },
+    { provider: 'bedrock', model: 'us.amazon.nova-pro-v1:0' },
   ],
   large: [
     { provider: 'nvidia', model: 'nvidia/llama-3.3-nemotron-super-49b-v1' },
     { provider: 'anthropic', model: 'claude-opus-4-8' },
     { provider: 'groq', model: 'openai/gpt-oss-120b' },
+    { provider: 'bedrock', model: 'us.anthropic.claude-sonnet-4-5-20250929-v1:0' },
   ],
 };
 
