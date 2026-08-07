@@ -12,22 +12,24 @@ import { selectRoleChain, resolveRoleTiering, LLM_ROLES, ROLE_TIERS, type LlmRol
  * model, and API key resolve from the in-app settings (Settings → AI Provider,
  * stored encrypted in the LlmSettings collection) with the LLM_* env vars as
  * fallback: LLM_PROVIDER (anthropic | groq | nvidia | gemini | openrouter |
- * huggingface | bedrock), LLM_MODEL, LLM_API_KEY (or the provider-specific key
+ * huggingface | bedrock | cerebras | mistral | cloudflare), LLM_MODEL,
+ * LLM_API_KEY (or the provider-specific key
  * env named in lib/llm-catalog.ts). When no key resolves the orchestrator runs
  * in the clearly-labelled indicative degraded mode (spec Assumptions) —
  * `llmAvailable()` lets callers branch.
  *
- * Groq, NVIDIA (NIM), Gemini, OpenRouter, and Hugging Face all use their
+ * Groq, NVIDIA (NIM), Gemini, OpenRouter, Hugging Face, Cerebras, Mistral, and
+ * Cloudflare Workers AI all use their
  * OpenAI-compatible REST endpoints directly (no SDK dependency — a single
  * JSON-in/JSON-out call doesn't justify one, Constitution I). AWS Bedrock uses
  * its native Converse REST API with a Bedrock API key as a bearer token — the
  * same single-secret shape as every other provider, so no AWS SDK or SigV4
- * signing chain is needed. NVIDIA and Gemini
- * both get OpenAI-style strict `response_format: json_schema` so the schema is
+ * signing chain is needed. NVIDIA, Gemini, Cerebras, and Mistral
+ * all get OpenAI-style strict `response_format: json_schema` so the schema is
  * enforced server-side, not just prompted; Groq and OpenRouter fall back to
- * prompted `json_object` mode, and Hugging Face is prompted-only (the router
- * fans out to hosts with uneven response_format support — an unsupported param
- * would 400 the whole call).
+ * prompted `json_object` mode, and Hugging Face and Cloudflare are
+ * prompted-only (uneven response_format support across their hosted models — an
+ * unsupported param would 400 the whole call).
  */
 
 type Provider = LlmProviderId;
@@ -35,13 +37,32 @@ type Provider = LlmProviderId;
 /** Providers served by the shared OpenAI-compatible transport below. */
 type OpenAiCompatProvider = Exclude<Provider, 'anthropic' | 'bedrock'>;
 
-const OPENAI_COMPAT_URL: Record<OpenAiCompatProvider, string> = {
+const OPENAI_COMPAT_URL: Record<Exclude<OpenAiCompatProvider, 'cloudflare'>, string> = {
   groq: 'https://api.groq.com/openai/v1/chat/completions',
   nvidia: 'https://integrate.api.nvidia.com/v1/chat/completions',
   gemini: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
   openrouter: 'https://openrouter.ai/api/v1/chat/completions',
   huggingface: 'https://router.huggingface.co/v1/chat/completions',
+  cerebras: 'https://api.cerebras.ai/v1/chat/completions',
+  mistral: 'https://api.mistral.ai/v1/chat/completions',
 };
+
+/**
+ * Cloudflare Workers AI is account-scoped: its OpenAI-compatible endpoint
+ * embeds the account id in the path. Like the Bedrock region, the account id
+ * is deployment configuration rather than a secret, so it is env-only —
+ * the settings UI still stores just the API token.
+ */
+function cloudflareAccountId(): string {
+  return process.env.CLOUDFLARE_ACCOUNT_ID || '';
+}
+
+function openAiCompatUrl(p: OpenAiCompatProvider): string {
+  if (p === 'cloudflare') {
+    return `https://api.cloudflare.com/client/v4/accounts/${cloudflareAccountId()}/ai/v1/chat/completions`;
+  }
+  return OPENAI_COMPAT_URL[p];
+}
 
 /**
  * Bedrock is region-scoped; every other provider here is a single global host.
@@ -276,6 +297,11 @@ const PROVIDER_RPM: Partial<Record<Provider, number>> = {
   groq: 30,
   gemini: 15,
   openrouter: 20,
+  cerebras: 30,
+  // Mistral's free Experiment tier is limited per SECOND (~1 req/s); the
+  // per-minute number is deliberately below the nominal 60 because bursts
+  // inside a second still 429 and are handled by Retry-After.
+  mistral: 30,
 };
 
 const BUDGET_WINDOW_MS = 60_000;
@@ -524,20 +550,31 @@ function extraHeaders(p: OpenAiCompatProvider): Record<string, string> {
  * same path as Gemini.
  */
 function structuredOutputParams(p: OpenAiCompatProvider, schema: Record<string, unknown>): Record<string, unknown> {
-  if (p === 'nvidia' || p === 'gemini') {
+  if (p === 'nvidia' || p === 'gemini' || p === 'cerebras' || p === 'mistral') {
     return { response_format: { type: 'json_schema', json_schema: { name: 'response', strict: true, schema } } };
   }
-  if (p === 'huggingface') return {};
+  // Cloudflare's json_schema support is a non-OpenAI shape available on only a
+  // subset of its models — an unsupported param 400s the call, so like the
+  // Hugging Face router it stays prompted-only with extractJson as the gate.
+  if (p === 'huggingface' || p === 'cloudflare') return {};
   return { response_format: { type: 'json_object' } };
 }
 
 /** OpenAI-compatible chat completions (Groq, NVIDIA NIM, Gemini, OpenRouter, Hugging Face) with structured-output JSON. */
 async function callOpenAiCompatible(cfg: LlmRuntimeConfig, opts: CompletionOpts): Promise<string> {
   const p = cfg.provider as OpenAiCompatProvider;
+  if (p === 'cloudflare' && !cloudflareAccountId()) {
+    // Configuration error, not an outage: never retried, and surfaced when
+    // Cloudflare is the active connection (skipped when it is a fallback).
+    throw new LlmError(
+      'Cloudflare Workers AI needs CLOUDFLARE_ACCOUNT_ID set in the environment alongside its API token.',
+      false
+    );
+  }
   const to = withTimeout(opts.signal, LLM_TIMEOUT_MS);
   let res: Response;
   try {
-    res = await fetch(OPENAI_COMPAT_URL[p], {
+    res = await fetch(openAiCompatUrl(p), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -1037,17 +1074,51 @@ export async function llmPing(cfg: LlmRuntimeConfig, signal?: AbortSignal): Prom
 
 /**
  * Every provider's model-listing endpoint (OpenAI-style `GET /models`).
- * Bedrock is absent: its listing lives on the region-scoped control-plane host
- * with a different response shape, handled by listBedrockModels below.
+ * Bedrock and Cloudflare are absent: their listings live on account/region-
+ * scoped hosts with different response shapes, handled by listBedrockModels
+ * and listCloudflareModels below.
  */
-const MODELS_URL: Record<Exclude<Provider, 'bedrock'>, string> = {
+const MODELS_URL: Record<Exclude<Provider, 'bedrock' | 'cloudflare'>, string> = {
   groq: 'https://api.groq.com/openai/v1/models',
   nvidia: 'https://integrate.api.nvidia.com/v1/models',
   gemini: 'https://generativelanguage.googleapis.com/v1beta/openai/models',
   openrouter: 'https://openrouter.ai/api/v1/models',
   huggingface: 'https://router.huggingface.co/v1/models',
   anthropic: 'https://api.anthropic.com/v1/models',
+  cerebras: 'https://api.cerebras.ai/v1/models',
+  mistral: 'https://api.mistral.ai/v1/models',
 };
+
+/**
+ * Workers AI's catalog endpoint is account-scoped and wraps results in
+ * Cloudflare's `{ result: [...] }` envelope with `name` (not `id`) fields, so
+ * it cannot share the OpenAI-style listing path. Filtered to text generation —
+ * the catalog also serves embedding/image/speech models this app cannot use.
+ */
+async function listCloudflareModels(apiKey: string): Promise<string[]> {
+  const account = cloudflareAccountId();
+  if (!account) {
+    throw new LlmError('Cloudflare Workers AI needs CLOUDFLARE_ACCOUNT_ID set in the environment.', false);
+  }
+  let res: Response;
+  try {
+    res = await fetch(
+      `https://api.cloudflare.com/client/v4/accounts/${account}/ai/models/search?task=Text%20Generation&per_page=100`,
+      { headers: { Authorization: `Bearer ${apiKey}` }, signal: AbortSignal.timeout(15_000) }
+    );
+  } catch {
+    throw new LlmError('Could not reach the provider to list models.', true);
+  }
+  if (!res.ok) {
+    if (res.status === 401 || res.status === 403) throw new LlmError(BAD_KEY_MESSAGE, false);
+    throw new LlmError(`Model listing failed (${res.status}).`, res.status >= 500);
+  }
+  const data = (await res.json()) as { result?: { name?: unknown }[] };
+  const ids = (data.result ?? [])
+    .map((m) => m.name)
+    .filter((id): id is string => typeof id === 'string' && id.length > 0);
+  return [...new Set(ids)].sort((a, b) => a.localeCompare(b));
+}
 
 /**
  * Bedrock's catalog is two lists: foundation models (base `vendor.model` ids)
@@ -1108,6 +1179,7 @@ export async function llmListModels(cfg: { provider: Provider; apiKey?: string }
     throw new LlmError('No API key — enter one or store it first.', false);
   }
   if (cfg.provider === 'bedrock') return listBedrockModels(cfg.apiKey);
+  if (cfg.provider === 'cloudflare') return listCloudflareModels(cfg.apiKey);
   const headers: Record<string, string> =
     cfg.provider === 'anthropic'
       ? { 'x-api-key': cfg.apiKey, 'anthropic-version': '2023-06-01' }

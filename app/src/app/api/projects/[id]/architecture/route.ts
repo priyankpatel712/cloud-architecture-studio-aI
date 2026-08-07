@@ -27,10 +27,11 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
             edges: architecture.edges,
             containers: architecture.containers ?? [],
             annotations: architecture.annotations ?? [],
+            formatRules: architecture.formatRules ?? [],
             guidance: architecture.guidance,
             version: architecture.version,
           }
-        : { nodes: [], edges: [], containers: [], annotations: [], guidance: {}, version: 0 },
+        : { nodes: [], edges: [], containers: [], annotations: [], formatRules: [], guidance: {}, version: 0 },
     });
   } catch (e) {
     return fail(e);
@@ -94,6 +95,9 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
           edges: body.edges,
           containers: body.containers,
           annotations: body.annotations,
+          // Only an explicit formatRules field may overwrite stored rules —
+          // see the schema note; chat-turn persists never touch them.
+          ...(body.formatRules !== undefined ? { formatRules: body.formatRules } : {}),
           ...(body.guidance ? { guidance: body.guidance } : {}),
           version: nextVersion,
         },

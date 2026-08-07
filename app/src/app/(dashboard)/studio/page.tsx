@@ -4,7 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import { ReactFlowProvider } from '@xyflow/react';
 import {
   Download, Sparkles, PanelRight, X, MessageSquare, Save, Loader2, TriangleAlert, RotateCcw,
-  Blocks, Route, History, Upload, MessagesSquare, FileText,
+  Blocks, Route, History, Upload, MessagesSquare, FileText, LayoutTemplate,
 } from 'lucide-react';
 import { Canvas, type CanvasApi, type CanvasStats } from '@/components/studio/Canvas';
 import { Inspector, type CanvasNode } from '@/components/studio/Inspector';
@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/Button';
 import { formatUSD, resolveServiceDef } from '@/lib/catalog';
 import { toMermaid, toJsonDocument, type ExportNode, type ExportEdge } from '@/lib/export/serialize';
 import { toTerraform } from '@/lib/export/terraform';
+import { DIAGRAM_TEMPLATES } from '@/lib/canvas/templates';
 import type { ArchDocument } from '@/lib/canvas/model';
 import { focusBounds } from '@/lib/canvas/capture';
 import { cn } from '@/lib/cn';
@@ -36,6 +37,8 @@ interface ApiDocument {
   edges: ArchDocument['edges'];
   containers?: ArchDocument['containers'];
   annotations?: ArchDocument['annotations'];
+  /** Lucid-parity conditional-formatting rules; absent on chat payloads (carried forward client-side) */
+  formatRules?: ArchDocument['formatRules'];
   guidance?: Record<string, string>;
   version: number;
 }
@@ -46,6 +49,7 @@ function toArchDocument(data: ApiDocument): ArchDocument {
     edges: data.edges,
     containers: data.containers ?? [],
     annotations: data.annotations ?? [],
+    ...(data.formatRules ? { formatRules: data.formatRules } : {}),
   };
 }
 
@@ -72,6 +76,8 @@ function StudioInner() {
   const [previewingVersion, setPreviewingVersion] = useState<number | null>(null);
   // 007 1.2 — import dialog (JSON round-trip / Mermaid paste).
   const [importOpen, setImportOpen] = useState(false);
+  // Lucid-parity templates gallery — start from a curated diagram.
+  const [templatesOpen, setTemplatesOpen] = useState(false);
   // 007 2.2 — comment threads panel.
   const [showComments, setShowComments] = useState(false);
 
@@ -184,13 +190,18 @@ function StudioInner() {
   }, [projectId, saving, version]);
 
   // Chat turns persist server-side; mirror the result onto the canvas (US2/AC5).
+  // formatRules are canvas-owned (the AI never edits them, and the chat persist
+  // path never writes them server-side) — carry the current rules forward so a
+  // turn doesn't visually clear them.
   const onChatArchitecture = useCallback((arch: ChatArchitecture) => {
+    const existing = canvasRef.current?.getDocument();
     canvasRef.current?.loadDocument(
       toArchDocument({
         nodes: arch.nodes as ArchDocument['nodes'],
         edges: arch.edges as ArchDocument['edges'],
         containers: arch.containers as ArchDocument['containers'] | undefined,
         annotations: arch.annotations as ArchDocument['annotations'] | undefined,
+        formatRules: existing?.formatRules,
         version: arch.version,
       })
     );
@@ -213,6 +224,7 @@ function StudioInner() {
         edges: edges as ArchDocument['edges'],
         containers: containers as ArchDocument['containers'],
         annotations: existing?.annotations,
+        formatRules: existing?.formatRules,
         version: 0,
       })
     );
@@ -851,6 +863,47 @@ function StudioInner() {
             <Button variant="outline" size="sm" onClick={() => setImportOpen(true)} title="Import a diagram (studio JSON or Mermaid)">
               <Upload size={15} /> <span className="hidden xl:inline">Import</span>
             </Button>
+            {/* Lucid-parity templates gallery: replaces the canvas like an import — persisted on Save. */}
+            <div className="relative">
+              <Button
+                variant={templatesOpen ? 'tonal' : 'outline'}
+                size="sm"
+                onClick={() => setTemplatesOpen((o) => !o)}
+                aria-expanded={templatesOpen}
+                title="Start from a template diagram"
+              >
+                <LayoutTemplate size={15} /> <span className="hidden xl:inline">Templates</span>
+              </Button>
+              {templatesOpen && (
+                <>
+                  <button type="button" aria-label="Close templates" className="fixed inset-0 z-20 cursor-default" onClick={() => setTemplatesOpen(false)} />
+                  <div className="absolute right-0 top-10 z-30 w-80 rounded-2xl border border-[var(--color-surface-variant)] bg-[var(--color-surface-container-lowest)] p-1.5 shadow-lg">
+                    <p className="px-2.5 pb-1 pt-1.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-secondary)]">
+                      Start from a template
+                    </p>
+                    {DIAGRAM_TEMPLATES.map((t) => (
+                      <button
+                        type="button"
+                        key={t.id}
+                        onClick={() => {
+                          setTemplatesOpen(false);
+                          onImportDocument(JSON.parse(JSON.stringify(t.doc)) as ArchDocument, false);
+                        }}
+                        title="Loads the template onto the canvas — press Save to keep it"
+                        className="w-full rounded-xl px-2.5 py-2 text-left hover:bg-[var(--color-surface-container-low)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                      >
+                        <span className="block text-xs font-semibold text-[var(--color-text-primary)]">{t.title}</span>
+                        <span className="block truncate text-[11px] text-[var(--color-text-secondary)]">{t.tagline}</span>
+                        <span className="mt-0.5 block truncate text-[10px] text-[var(--color-text-secondary)]">{t.services.join(' · ')}</span>
+                      </button>
+                    ))}
+                    <p className="px-2.5 pb-1.5 pt-1 text-[10px] leading-snug text-[var(--color-text-secondary)]">
+                      Replaces the current canvas — your previous state stays in version history after your next save.
+                    </p>
+                  </div>
+                </>
+              )}
+            </div>
             {projectId && (
               <Button
                 variant="outline"

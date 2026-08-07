@@ -19,6 +19,9 @@ const LLM_ENV = [
   'OPENROUTER_API_KEY',
   'HF_TOKEN',
   'HUGGINGFACE_API_KEY',
+  'CEREBRAS_API_KEY',
+  'MISTRAL_API_KEY',
+  'CLOUDFLARE_API_TOKEN',
 ] as const;
 
 const saved: Partial<Record<string, string | undefined>> = {};

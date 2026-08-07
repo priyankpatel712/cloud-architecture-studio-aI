@@ -26,6 +26,21 @@ export const serviceNodeSchema = z.object({
   containerId: z.string().max(64).nullable().optional().default(null),
   // 007 2.3 — optional accent override, same constrained tokens as edges.
   accent: z.enum(['default', 'primary', 'success', 'warning', 'danger']).optional(),
+  // Lucid-parity hotspot — http(s) URL only; empty string clears it.
+  link: z
+    .string()
+    .max(500)
+    .refine((v) => v === '' || /^https?:\/\//i.test(v), 'link must be an http(s) URL')
+    .optional(),
+});
+
+/** Lucid-parity conditional-formatting rule (lib/canvas/conditional-format.ts). */
+export const formatRuleSchema = z.object({
+  ruleId: z.string().min(1).max(64),
+  field: z.enum(['cost', 'provider', 'category', 'serviceId', 'name']),
+  op: z.enum(['gt', 'gte', 'lt', 'lte', 'eq', 'neq', 'contains']),
+  value: z.string().max(120),
+  accent: z.enum(['primary', 'success', 'warning', 'danger']),
 });
 
 /** Constrained style tokens (002 data-model) — never free-form styling. */
@@ -101,6 +116,11 @@ export const architecturePutSchema = z
     edges: z.array(serviceEdgeSchema).max(600),
     containers: z.array(containerSchema).max(100).optional().default([]),
     annotations: z.array(annotationSchema).max(200).optional().default([]),
+    // Optional WITHOUT a default on purpose: only a body that explicitly sends
+    // formatRules (the studio always does) may overwrite them — an older
+    // client or a partial writer omitting the field must never wipe stored
+    // rules on save.
+    formatRules: z.array(formatRuleSchema).max(20).optional(),
     guidance: guidanceSchema.optional(),
     version: z.number().int().positive(),
   })

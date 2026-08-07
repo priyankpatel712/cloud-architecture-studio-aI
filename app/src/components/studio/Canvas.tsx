@@ -7,6 +7,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
   type DragEvent,
   type Ref,
 } from 'react';
@@ -32,7 +33,7 @@ import {
   AlignStartVertical, AlignCenterVertical, AlignEndVertical,
   AlignStartHorizontal, AlignCenterHorizontal, AlignEndHorizontal,
   AlignHorizontalDistributeCenter, AlignVerticalDistributeCenter, ChevronDown,
-  Play, Pause, ChevronLeft, ChevronRight, X,
+  Play, Pause, ChevronLeft, ChevronRight, X, Paintbrush, Trash2, Check,
 } from 'lucide-react';
 import { ServiceNode, type ServiceNodeData as SvcData } from '@/components/studio/ServiceNode';
 import { ContainerNode } from '@/components/studio/ContainerNode';
@@ -41,6 +42,10 @@ import { OrthogonalEdge } from '@/components/studio/OrthogonalEdge';
 import { AlignmentGuides } from '@/components/studio/AlignmentGuides';
 import { computeFlowSteps, type FlowStep } from '@/lib/canvas/walkthrough';
 import { suggestNextServices } from '@/lib/canvas/quick-connect';
+import {
+  FORMAT_RULE_LIMIT, RULE_FIELDS, RULE_OPS, describeRule, newFormatRuleId, sanitizeFormatRules,
+} from '@/lib/canvas/conditional-format';
+import type { FormatRule } from '@/lib/canvas/model';
 import { ServiceIcon } from '@/components/ui/Icon';
 import { MiniMapPanel } from '@/components/studio/MiniMapPanel';
 import { ShortcutsHelp } from '@/components/studio/ShortcutsHelp';
@@ -86,6 +91,54 @@ const nodeTypesBase = { service: ServiceNode, container: ContainerNode, annotati
 const edgeTypes = { orthogonal: OrthogonalEdge };
 const MOD = typeof navigator !== 'undefined' && /Mac/.test(navigator.platform) ? '⌘' : 'Ctrl';
 const HISTORY_LIMIT = 50;
+
+/**
+ * Lucid-style canvas background options (Lucidchart's canvas settings offer
+ * square grid / dotted grid / no grid): grid lines, dots, cross ticks, or a
+ * plain surface. Persisted per browser alongside snap-to-grid — a canvas
+ * preference, not document data, so it does not live in the ArchDocument.
+ */
+type CanvasBackground = 'lines' | 'dots' | 'cross' | 'none';
+const CANVAS_BACKGROUNDS: { id: CanvasBackground; label: string }[] = [
+  { id: 'lines', label: 'Grid lines' },
+  { id: 'dots', label: 'Dotted grid' },
+  { id: 'cross', label: 'Cross ticks' },
+  { id: 'none', label: 'Plain (no grid)' },
+];
+const BG_STORAGE_KEY = 'studio.canvas.background';
+const SNAP_STORAGE_KEY = 'studio.canvas.snap';
+
+/**
+ * View preferences live in localStorage behind useSyncExternalStore: the server
+ * snapshot is null (defaults), the client snapshot is the stored value, so SSR
+ * hydration stays consistent and a change in another tab syncs via 'storage'.
+ * Same-tab writes notify the local listener set (storage events only fire
+ * cross-tab).
+ */
+const prefListeners = new Set<() => void>();
+function readPref(key: string): string | null {
+  try {
+    return window.localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+function writePref(key: string, value: string): void {
+  try {
+    window.localStorage.setItem(key, value);
+  } catch {
+    /* storage unavailable (private mode) — the preference just won't persist */
+  }
+  prefListeners.forEach((l) => l());
+}
+function subscribePrefs(cb: () => void): () => void {
+  prefListeners.add(cb);
+  window.addEventListener('storage', cb);
+  return () => {
+    prefListeners.delete(cb);
+    window.removeEventListener('storage', cb);
+  };
+}
 
 function isEditableTarget(t: EventTarget | null): boolean {
   const el = t as HTMLElement | null;
@@ -177,7 +230,15 @@ function CanvasImpl(
   }, [onDirty, onSelectionChange, onStats, onServiceOpen]);
 
   const [dragOver, setDragOver] = useState(false);
-  const [snapToGrid, setSnapToGrid] = useState(true);
+  const [viewMenuOpen, setViewMenuOpen] = useState(false);
+  const storedBg = useSyncExternalStore(subscribePrefs, () => readPref(BG_STORAGE_KEY), () => null);
+  const bgStyle: CanvasBackground = CANVAS_BACKGROUNDS.some((b) => b.id === storedBg)
+    ? (storedBg as CanvasBackground)
+    : 'lines';
+  const storedSnap = useSyncExternalStore(subscribePrefs, () => readPref(SNAP_STORAGE_KEY), () => null);
+  const snapToGrid = storedSnap === null ? true : storedSnap === 'true';
+  const pickBackground = useCallback((bg: CanvasBackground) => writePref(BG_STORAGE_KEY, bg), []);
+  const toggleSnap = useCallback(() => writePref(SNAP_STORAGE_KEY, String(!snapToGrid)), [snapToGrid]);
   const [spacePressed, setSpacePressed] = useState(false);
   const [guides, setGuides] = useState<GuideLine[]>([]);
   const [menu, setMenu] = useState<{ target: ContextMenuTarget; screen: { x: number; y: number } } | null>(null);
@@ -185,6 +246,14 @@ function CanvasImpl(
   const [containerDeleteConfirm, setContainerDeleteConfirm] = useState<{ ids: Set<string> } | null>(null);
   const [basis, setBasis] = useState<'exact' | 'indicative'>('indicative');
   const [addContainerOpen, setAddContainerOpen] = useState(false);
+  // Lucid-parity conditional formatting — document-level rules, persisted with
+  // the architecture and evaluated at render time by ServiceNode.
+  const [formatRules, setFormatRules] = useState<FormatRule[]>([]);
+  const [formatOpen, setFormatOpen] = useState(false);
+  const formatRulesRef = useRef<FormatRule[]>([]);
+  useEffect(() => {
+    formatRulesRef.current = formatRules;
+  }, [formatRules]);
 
   // ---- History (undo/redo) — snapshots at commit points, not every drag frame ----
   const historyRef = useRef<{ nodes: Node[]; edges: Edge[] }[]>([]);
@@ -271,9 +340,21 @@ function CanvasImpl(
   const renameContainer = useCallback((id: string, label: string) => patchNodeData(id, { label }), [patchNodeData]);
   const changeAnnotationContent = useCallback((id: string, content: string) => patchNodeData(id, { content }), [patchNodeData]);
 
+  // Rule add/remove mark the document dirty — rules persist with the next Save.
+  const addFormatRule = useCallback((rule: Omit<FormatRule, 'ruleId'>) => {
+    setFormatRules((rs) => (rs.length >= FORMAT_RULE_LIMIT ? rs : [...rs, { ...rule, ruleId: newFormatRuleId() }]));
+    onDirtyRef.current();
+  }, []);
+  const removeFormatRule = useCallback((ruleId: string) => {
+    setFormatRules((rs) => rs.filter((r) => r.ruleId !== ruleId));
+    onDirtyRef.current();
+  }, []);
+
   const nodeTypes = useMemo(
     () => ({
-      service: (p: Parameters<typeof ServiceNode>[0]) => <nodeTypesBase.service {...p} onRename={renameService} />,
+      service: (p: Parameters<typeof ServiceNode>[0]) => (
+        <nodeTypesBase.service {...p} onRename={renameService} formatRules={formatRules} />
+      ),
       container: (p: Parameters<typeof ContainerNode>[0]) => (
         <nodeTypesBase.container {...p} onRename={renameContainer} onResizeEnd={resizeElement} />
       ),
@@ -281,7 +362,7 @@ function CanvasImpl(
         <nodeTypesBase.annotation {...p} onContentChange={changeAnnotationContent} onResizeEnd={resizeElement} />
       ),
     }),
-    [renameService, renameContainer, changeAnnotationContent, resizeElement]
+    [renameService, renameContainer, changeAnnotationContent, resizeElement, formatRules]
   );
 
   // ---- Selection + stats reporting ----
@@ -1012,11 +1093,14 @@ function CanvasImpl(
   useImperativeHandle(
     ref,
     () => ({
-      getDocument: () => flowToDocument(nodesRef.current, edgesRef.current, serviceMeta),
+      // formatRules always included (even []) so an explicit save is
+      // authoritative — deleting the last rule persists the deletion.
+      getDocument: () => ({ ...flowToDocument(nodesRef.current, edgesRef.current, serviceMeta), formatRules: formatRulesRef.current }),
       loadDocument: (doc: ArchDocument) => {
         const { nodes: n, edges: e } = documentToFlow(doc);
         setNodes(n);
         setEdges(e);
+        setFormatRules(sanitizeFormatRules(doc.formatRules));
         historyRef.current = [{ nodes: n.map(cloneNode), edges: e.map(cloneEdge) }];
         historyIndexRef.current = 0;
         syncHistoryView();
@@ -1195,17 +1279,69 @@ function CanvasImpl(
           pressed={walkthrough !== null}
           onClick={() => (walkthrough ? setWalkthrough(null) : startWalkthrough())}
         />
+        <div className="relative">
+          <button
+            onClick={() => setViewMenuOpen((o) => !o)}
+            aria-label="Canvas view options"
+            aria-expanded={viewMenuOpen}
+            title="Canvas view options (background style, snap)"
+            className={cn(
+              'flex h-7 items-center gap-0.5 rounded-lg px-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]',
+              viewMenuOpen
+                ? 'bg-[var(--color-primary-fixed)] text-[var(--color-on-primary-fixed)]'
+                : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-container-low)] hover:text-[var(--color-text-primary)]'
+            )}
+          >
+            <Grid3x3 size={15} />
+            <ChevronDown size={11} />
+          </button>
+          {viewMenuOpen && (
+            <div className="absolute left-0 top-8 z-30 w-48 rounded-2xl border border-[var(--color-surface-variant)] bg-[var(--color-surface-container-lowest)] p-1.5 shadow-lg">
+              <p className="px-2.5 pb-1 pt-0.5 text-[10px] font-medium uppercase tracking-wide text-[var(--color-text-secondary)]">
+                Background
+              </p>
+              {CANVAS_BACKGROUNDS.map((b) => (
+                <button
+                  key={b.id}
+                  onClick={() => pickBackground(b.id)}
+                  className="flex w-full items-center gap-2 rounded-xl px-2.5 py-1.5 text-left text-xs font-medium text-[var(--color-text-primary)] hover:bg-[var(--color-surface-container-low)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+                >
+                  <span className="w-3.5">{bgStyle === b.id && <Check size={13} />}</span>
+                  {b.label}
+                </button>
+              ))}
+              <div className="mx-1 my-1 h-px bg-[var(--color-surface-variant)]" />
+              <button
+                onClick={toggleSnap}
+                className="flex w-full items-center gap-2 rounded-xl px-2.5 py-1.5 text-left text-xs font-medium text-[var(--color-text-primary)] hover:bg-[var(--color-surface-container-low)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)]"
+              >
+                <span className="w-3.5">{snapToGrid && <Check size={13} />}</span>
+                Snap to grid
+              </button>
+            </div>
+          )}
+        </div>
         <IconButton
-          icon={<Grid3x3 size={15} />}
-          label="Toggle snap to grid"
-          pressed={snapToGrid}
-          onClick={() => setSnapToGrid((s) => !s)}
+          icon={<Paintbrush size={15} />}
+          label={`Conditional formatting${formatRules.length > 0 ? ` (${formatRules.length} rule${formatRules.length === 1 ? '' : 's'})` : ''}`}
+          pressed={formatOpen || formatRules.length > 0}
+          onClick={() => setFormatOpen((o) => !o)}
         />
         <Divider />
         <IconButton icon={<Undo2 size={15} />} label={`Undo (${MOD}Z)`} disabled={!canUndo} onClick={undo} />
         <IconButton icon={<Redo2 size={15} />} label={`Redo (${MOD}⇧Z)`} disabled={!canRedo} onClick={redo} />
         <IconButton icon={<Keyboard size={15} />} label="Keyboard shortcuts (?)" onClick={() => setShortcutsOpen(true)} />
       </div>
+
+      {/* Lucid-parity conditional formatting — data-linked styling rules. */}
+      {formatOpen && (
+        <FormatRulesPanel
+          rules={formatRules}
+          onAdd={addFormatRule}
+          onRemove={removeFormatRule}
+          onClose={() => setFormatOpen(false)}
+        />
+      )}
 
       {/* 007 2.1 — quick-connect suggestion popover at the drop point. */}
       {quickConnect && (
@@ -1310,7 +1446,20 @@ function CanvasImpl(
         className="!bg-[var(--color-surface-container-low)]"
         onlyRenderVisibleElements={nodes.length > 60}
       >
-        <Background variant={BackgroundVariant.Lines} gap={16} color="var(--color-outline-variant)" />
+        {bgStyle !== 'none' && (
+          <Background
+            variant={
+              bgStyle === 'dots'
+                ? BackgroundVariant.Dots
+                : bgStyle === 'cross'
+                  ? BackgroundVariant.Cross
+                  : BackgroundVariant.Lines
+            }
+            gap={bgStyle === 'cross' ? 24 : 16}
+            size={bgStyle === 'dots' ? 1.5 : bgStyle === 'cross' ? 5 : undefined}
+            color="var(--color-outline-variant)"
+          />
+        )}
         <Controls className="!rounded-xl !border !border-[var(--color-surface-variant)] !shadow-sm" showInteractive={false} />
         <AlignmentGuides guides={guides} />
       </ReactFlow>
@@ -1355,6 +1504,26 @@ function CanvasImpl(
                   style={{ background: EDGE_COLORS[token] }}
                 />
               ))}
+              {/* Lucid-parity hotspot: attach an external URL to the node. */}
+              <span className="px-1 text-[10px] font-medium uppercase tracking-wide text-[var(--color-text-secondary)]">Link</span>
+              <input
+                key={singleService.id}
+                defaultValue={((singleService.data as SvcData).link as string) ?? ''}
+                placeholder="https://…"
+                title="Attach an external URL (docs, console, runbook) — opens from the node"
+                onKeyDown={(e) => {
+                  e.stopPropagation();
+                  if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
+                }}
+                onBlur={(e) => {
+                  const v = e.target.value.trim();
+                  const current = ((singleService.data as SvcData).link as string) ?? '';
+                  if (v !== current && (v === '' || /^https?:\/\//i.test(v))) {
+                    patchNodeData(singleService.id, { link: v || undefined });
+                  }
+                }}
+                className="nodrag h-7 w-44 rounded-lg border border-[var(--color-outline-variant)] bg-transparent px-2 text-[11px] text-[var(--color-text-primary)] outline-none focus:border-[var(--color-primary)]"
+              />
             </>
           )}
           {singleContainer && (
@@ -1489,6 +1658,123 @@ function CanvasImpl(
             </div>
           </div>
         </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Conditional-formatting rules panel (Lucid-parity data linking): list the
+ * document's rules and add/remove them. Evaluation itself happens in
+ * ServiceNode at render time — this panel only edits the rule list.
+ */
+function FormatRulesPanel({
+  rules,
+  onAdd,
+  onRemove,
+  onClose,
+}: {
+  rules: FormatRule[];
+  onAdd: (rule: Omit<FormatRule, 'ruleId'>) => void;
+  onRemove: (ruleId: string) => void;
+  onClose: () => void;
+}) {
+  const [field, setField] = useState<FormatRule['field']>('cost');
+  const [op, setOp] = useState<FormatRule['op']>('gt');
+  const [value, setValue] = useState('');
+  const [accent, setAccent] = useState<FormatRule['accent']>('warning');
+  const numericField = RULE_FIELDS.find((f) => f.id === field)?.numeric ?? false;
+  // Numeric fields get numeric ops; string fields get string ops.
+  const ops = RULE_OPS.filter((o) => o.numeric === numericField);
+  const opValid = ops.some((o) => o.id === op);
+  const canAdd = value.trim().length > 0 && opValid && rules.length < FORMAT_RULE_LIMIT && (!numericField || Number.isFinite(Number(value)));
+
+  return (
+    <div className="absolute left-3 top-14 z-30 w-[340px] rounded-2xl border border-[var(--color-surface-variant)] bg-[var(--color-surface-container-lowest)] p-3 shadow-lg">
+      <div className="mb-2 flex items-center justify-between">
+        <p className="text-xs font-semibold text-[var(--color-text-primary)]">Conditional formatting</p>
+        <button aria-label="Close" onClick={onClose} className="rounded p-0.5 text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-container-low)]">
+          <X size={13} />
+        </button>
+      </div>
+      <p className="mb-2 text-[11px] leading-snug text-[var(--color-text-secondary)]">
+        Color services by their data — the styling follows the data as it changes. First matching rule wins; rules save with the diagram.
+      </p>
+      {rules.length > 0 && (
+        <ul className="mb-2 space-y-1">
+          {rules.map((r) => (
+            <li key={r.ruleId} className="flex items-center gap-2 rounded-xl border border-[var(--color-surface-variant)] px-2 py-1">
+              <span className="h-3 w-3 shrink-0 rounded-full" style={{ background: EDGE_COLORS[r.accent] }} />
+              <span className="min-w-0 flex-1 truncate text-[11px] text-[var(--color-text-primary)]" title={describeRule(r)}>
+                {describeRule(r)}
+              </span>
+              <button aria-label="Remove rule" title="Remove rule" onClick={() => onRemove(r.ruleId)} className="rounded p-0.5 text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-container-low)] hover:text-[var(--color-danger,#d93025)]">
+                <Trash2 size={12} />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      <div className="flex flex-wrap items-center gap-1.5">
+        <Select
+          aria-label="Rule field"
+          value={field}
+          onChange={(e) => {
+            const next = e.target.value as FormatRule['field'];
+            setField(next);
+            const nextNumeric = RULE_FIELDS.find((f) => f.id === next)?.numeric ?? false;
+            const nextOps = RULE_OPS.filter((o) => o.numeric === nextNumeric);
+            if (!nextOps.some((o) => o.id === op)) setOp(nextOps[0].id);
+          }}
+          className="h-7 w-[124px] text-[11px]"
+        >
+          {RULE_FIELDS.map((f) => (
+            <option key={f.id} value={f.id}>{f.label}</option>
+          ))}
+        </Select>
+        <Select aria-label="Rule operator" value={op} onChange={(e) => setOp(e.target.value as FormatRule['op'])} className="h-7 w-[86px] text-[11px]">
+          {ops.map((o) => (
+            <option key={o.id} value={o.id}>{o.label}</option>
+          ))}
+        </Select>
+        <input
+          aria-label="Rule value"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          onKeyDown={(e) => {
+            e.stopPropagation();
+            if (e.key === 'Enter' && canAdd) {
+              onAdd({ field, op, value: value.trim(), accent });
+              setValue('');
+            }
+          }}
+          placeholder={numericField ? 'e.g. 100' : 'e.g. mongodb'}
+          className="h-7 w-[104px] rounded-lg border border-[var(--color-outline-variant)] bg-transparent px-2 text-[11px] text-[var(--color-text-primary)] outline-none focus:border-[var(--color-primary)]"
+        />
+        {(['primary', 'success', 'warning', 'danger'] as const).map((token) => (
+          <button
+            key={token}
+            aria-label={`Rule color ${token}`}
+            title={token}
+            onClick={() => setAccent(token)}
+            className={cn('h-5 w-5 rounded-full border-2', accent === token ? 'border-[var(--color-text-primary)]' : 'border-transparent')}
+            style={{ background: EDGE_COLORS[token] }}
+          />
+        ))}
+        <Button
+          size="sm"
+          variant="tonal"
+          disabled={!canAdd}
+          onClick={() => {
+            onAdd({ field, op, value: value.trim(), accent });
+            setValue('');
+          }}
+        >
+          Add rule
+        </Button>
+      </div>
+      {rules.length >= FORMAT_RULE_LIMIT && (
+        <p className="mt-1.5 text-[10px] text-[var(--color-text-secondary)]">Rule limit reached ({FORMAT_RULE_LIMIT}) — remove one to add another.</p>
       )}
     </div>
   );

@@ -15,6 +15,9 @@ export const LLM_PROVIDER_IDS = [
   // Appended last deliberately: resolveLlmConfigs iterates this order to build
   // the fallback chain, so a new provider must not displace existing ones.
   'bedrock',
+  'cerebras',
+  'mistral',
+  'cloudflare',
 ] as const;
 
 export type LlmProviderId = (typeof LLM_PROVIDER_IDS)[number];
@@ -203,6 +206,62 @@ export const LLM_PROVIDERS: Record<LlmProviderId, LlmProviderInfo> = {
     // key exported for the AWS CLI/SDK works here unchanged.
     keyEnvAliases: ['AWS_BEARER_TOKEN_BEDROCK'],
     keyUrl: 'https://console.aws.amazon.com/bedrock/home#/api-keys',
+  },
+  cerebras: {
+    id: 'cerebras',
+    label: 'Cerebras',
+    blurb:
+      'Wafer-scale inference at 2000+ tok/s; the free tier resets daily (~1M tokens/day, ~30 req/min, 65k context).',
+    // Cerebras rotates its catalog aggressively — by 2026-08 the llama/qwen ids
+    // were withdrawn and gpt-oss-120b is the only production-tagged model
+    // (gemma-4-31b is preview). `npm run models:check` re-verifies these.
+    defaultModel: 'gpt-oss-120b',
+    models: ['gpt-oss-120b', 'gemma-4-31b'],
+    modelInfo: {
+      'gpt-oss-120b': { id: 'gpt-oss-120b', tier: 'large', ctx: 65536, multimodal: false },
+      'gemma-4-31b': { id: 'gemma-4-31b', tier: 'mid', ctx: 65536, multimodal: false },
+    },
+    keyEnv: 'CEREBRAS_API_KEY',
+    keyUrl: 'https://cloud.cerebras.ai',
+  },
+  mistral: {
+    id: 'mistral',
+    label: 'Mistral',
+    blurb:
+      'La Plateforme free Experiment tier — every Mistral model at ~1 req/s, 1B tokens/month.',
+    defaultModel: 'mistral-small-latest',
+    // `-latest` aliases track Mistral's releases, so these ids do not go stale
+    // the way pinned version ids do.
+    models: ['mistral-small-latest', 'mistral-medium-latest', 'mistral-large-latest', 'codestral-latest'],
+    modelInfo: {
+      'mistral-small-latest': { id: 'mistral-small-latest', tier: 'small', ctx: 131072, multimodal: true },
+      'mistral-medium-latest': { id: 'mistral-medium-latest', tier: 'mid', ctx: 131072, multimodal: true },
+      'mistral-large-latest': { id: 'mistral-large-latest', tier: 'large', ctx: 131072, multimodal: true },
+      'codestral-latest': { id: 'codestral-latest', tier: 'mid', ctx: 262144, multimodal: false },
+    },
+    keyEnv: 'MISTRAL_API_KEY',
+    keyUrl: 'https://console.mistral.ai/api-keys',
+  },
+  cloudflare: {
+    id: 'cloudflare',
+    label: 'Cloudflare Workers AI',
+    blurb:
+      'Workers AI free daily allocation (~10k neurons/day). Needs CLOUDFLARE_ACCOUNT_ID in the environment alongside the API token.',
+    defaultModel: '@cf/openai/gpt-oss-120b',
+    models: [
+      '@cf/openai/gpt-oss-120b',
+      '@cf/openai/gpt-oss-20b',
+      '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
+      '@cf/meta/llama-3.1-8b-instruct-fast',
+    ],
+    modelInfo: {
+      '@cf/openai/gpt-oss-120b': { id: '@cf/openai/gpt-oss-120b', tier: 'large', ctx: 131072, multimodal: false },
+      '@cf/openai/gpt-oss-20b': { id: '@cf/openai/gpt-oss-20b', tier: 'small', ctx: 131072, multimodal: false },
+      '@cf/meta/llama-3.3-70b-instruct-fp8-fast': { id: '@cf/meta/llama-3.3-70b-instruct-fp8-fast', tier: 'mid', ctx: 24000, multimodal: false },
+      '@cf/meta/llama-3.1-8b-instruct-fast': { id: '@cf/meta/llama-3.1-8b-instruct-fast', tier: 'small', ctx: 32768, multimodal: false },
+    },
+    keyEnv: 'CLOUDFLARE_API_TOKEN',
+    keyUrl: 'https://dash.cloudflare.com/profile/api-tokens',
   },
 };
 

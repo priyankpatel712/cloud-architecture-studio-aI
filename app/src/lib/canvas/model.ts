@@ -83,6 +83,28 @@ export interface DocNode {
   containerId?: string | null;
   /** 007 2.3 — optional user accent override (same constrained tokens as edges) */
   accent?: EdgeColor;
+  /** Lucid-parity hotspot: optional external URL opened from the node (docs, console, runbook) */
+  link?: string;
+}
+
+// ---- Conditional formatting (Lucid-parity data linking) ----------------------
+// A rule colors any service node whose DATA matches — cost thresholds,
+// provider, category, service, or display name — with the same constrained
+// accent tokens as manual overrides. Rules live on the ArchDocument and are
+// evaluated at render time (lib/canvas/conditional-format.ts), so they restyle
+// nodes as the underlying data changes without touching the nodes themselves.
+
+export type FormatRuleField = 'cost' | 'provider' | 'category' | 'serviceId' | 'name';
+export type FormatRuleOp = 'gt' | 'gte' | 'lt' | 'lte' | 'eq' | 'neq' | 'contains';
+
+export interface FormatRule {
+  ruleId: string;
+  field: FormatRuleField;
+  op: FormatRuleOp;
+  /** always stored as a string; numeric ops parse it (schema-stable) */
+  value: string;
+  /** never 'default' — a rule that styles nothing is just deleted */
+  accent: Exclude<EdgeColor, 'default'>;
 }
 export interface DocEdge {
   edgeId: string;
@@ -118,6 +140,8 @@ export interface ArchDocument {
   edges: DocEdge[];
   containers: DocContainer[];
   annotations: DocAnnotation[];
+  /** conditional-formatting rules (Lucid-parity); absent on pre-feature documents */
+  formatRules?: FormatRule[];
 }
 
 // ---- React Flow node data payloads ----
@@ -131,6 +155,8 @@ export interface ServiceNodeData extends Record<string, unknown> {
   category?: string;
   /** 007 2.3 — optional user accent override (constrained token) */
   accent?: EdgeColor;
+  /** Lucid-parity hotspot: external URL opened from the node */
+  link?: string;
 }
 export interface ContainerNodeData extends Record<string, unknown> {
   ctype: string;
@@ -204,6 +230,7 @@ export function documentToFlow(doc: ArchDocument): { nodes: Node[]; edges: Edge[
         provider: n.provider,
         category: n.category || undefined,
         accent: n.accent && n.accent !== 'default' ? n.accent : undefined,
+        link: n.link || undefined,
       } satisfies ServiceNodeData,
       // No `extent: 'parent'` — members may be dragged out of a container to
       // change membership (002 FR-005 drag-in/drag-out).
@@ -303,6 +330,7 @@ export function flowToDocument(
         displayName: data.displayName ?? '',
         containerId: n.parentId ?? null,
         ...(data.accent && data.accent !== 'default' ? { accent: data.accent } : {}),
+        ...(typeof data.link === 'string' && data.link.trim() ? { link: data.link.trim() } : {}),
       });
     }
   }

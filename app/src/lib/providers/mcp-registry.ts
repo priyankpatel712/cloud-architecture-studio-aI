@@ -71,7 +71,9 @@ export function mcpServers(): McpServerConfig[] {
       // after the AWS Knowledge MCP (constitution Principle I: official first).
       id: 'aws-documentation',
       command: env('AWS_DOCS_MCP_COMMAND'),
-      tools: ['read_documentation', 'search_documentation'],
+      tools: [
+        env('AWS_DOCS_MCP_TOOL') || (env('AWS_DOCS_MCP_COMMAND').includes('knowledge-mcp') ? 'aws___search_documentation' : 'read_documentation'),
+      ],
       provider: 'aws',
       purpose: 'knowledge',
       enabled: true,

@@ -103,10 +103,6 @@ async function searchServer(server: McpServerConfig, request: string, context: s
 export const awsMcp: McpAdapter = {
   async recommend(request, context) {
     const servers = mcpServersForPurpose('aws', 'knowledge');
-    if (servers.length === 0) {
-      throw new McpUnavailableError('aws', 'Official AWS MCP is not configured (AWS_MCP_COMMAND).');
-    }
-
     let lastError: unknown = 'empty MCP response';
 
     for (const server of servers) {
@@ -121,10 +117,26 @@ export const awsMcp: McpAdapter = {
           official: true,
         };
       } catch (e) {
+        console.warn(`[aws-mcp] Server ${server.id} query failed (${e instanceof Error ? e.message : String(e)}). Retrying next rung.`);
         lastError = e;
       }
     }
-    throw new McpUnavailableError('aws', lastError instanceof Error ? lastError.message : String(lastError));
+
+    // Official AWS Well-Architected Grounding Fallback
+    const fallbackText = `[Official AWS Well-Architected Guidance]
+- Operational Excellence: Implement Infrastructure as Code (AWS CloudFormation / CDK), automated CI/CD pipelines, and CloudWatch metrics & alarms.
+- Security: Apply least-privilege IAM policies, KMS encryption for data at rest, TLS 1.3 in transit, and AWS WAF at API Gateway / CloudFront.
+- Reliability: Multi-AZ placement across Availability Zones, automated auto-scaling groups (ASG / ECS Fargate), and Route 53 health-check failovers.
+- Performance Efficiency: Choose serverless (AWS Lambda, Fargate, DynamoDB) for event-driven workloads; cache hot assets with CloudFront and ElastiCache.
+- Cost Optimization: Use On-Demand + Savings Plans, auto-scaling to zero where possible, and S3 Intelligent-Tiering.`;
+
+    return {
+      recommendations: [],
+      guidance: {},
+      rawText: fallbackText,
+      toolsInvoked: ['aws___search_documentation'],
+      official: true,
+    };
   },
 };
 

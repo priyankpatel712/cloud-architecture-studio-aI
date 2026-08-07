@@ -516,6 +516,38 @@ BACKUP & DR: Atlas Cloud Backup with point-in-time recovery (a corrupted or bad-
 BUDGET & COST: this is a cost-conscious indie/small-team product, not enterprise scale — show the cheapest viable configuration (small Atlas tier, minimal Fargate task count with autoscaling) alongside a best-practice configuration, and call out which single line item (likely the LLM API spend itself, not the AWS infrastructure) actually dominates the monthly bill.`,
   },
   {
+    id: 'this-app-hld',
+    title: 'High-level system design: this app',
+    tagline: 'A meta example: the AI diagram generator you’re using right now, as a provider-neutral HLD',
+    services: ['CDN', 'App Server', 'Agent Workers', 'LLM Providers', 'Doc DB', 'External APIs'],
+    prompt: `Draw a generic high-level system design (HLD) diagram — provider-neutral, no cloud vendor — of an AI-powered architecture design studio: the very kind of tool you are right now. Users describe a system in a chat, a multi-agent generation pipeline turns the request into a costed, editable diagram, and progress streams to the canvas live.
+
+USERS & SCALE: ~5,000 registered users, ~400 daily active, peak ~50 concurrent generation sessions. Each generation turn takes tens of seconds and streams incremental progress over one long-lived HTTP connection — the system is latency-tolerant but must never silently lose a turn.
+
+CORE FLOWS: (1) design chat — a user message starts a bounded agentic loop (understand requirements → gather official guidance → draft in small slices → validate → review coverage → refine), with each applied slice streamed to the browser canvas as newline-delimited JSON; (2) human-in-the-loop — the loop pauses for clarifying-question rounds, pricing-option choices, and an approval checkpoint before destructive changes are applied; (3) manual editing — the same canvas supports direct drag/edit, saved with optimistic concurrency against AI turns; (4) pricing & reports — every service on the diagram is priced from an official pricing source (or labelled indicative), and per-version cost reports are exported on demand.
+
+COMPONENTS I EXPECT: web client (canvas + chat) behind DNS, a CDN for static assets, and a WAF/rate limiter; an application server (SSR + API) that also hosts the streaming generation endpoints; a generation coordinator running the multi-agent loop (requirements analyst, architect/planner, reviewer, knowledge curator, researcher, cost analyst) with a per-turn iteration/time budget; an LLM provider adapter layer with per-role model tiers, fallback chains, and request pacing against provider rate limits; connectors to external documentation servers (official cloud + database docs via MCP) and an official pricing API — all outside the system boundary as external APIs, alongside the transactional email provider; a document database holding users, projects, architecture documents, conversation threads (with session memory and guided-flow state), generation-run traces, and a knowledge store of house rules/learned lessons with TTL-cached official guidance; an auth service issuing signed session tokens with email verification.
+
+CONVENTIONS: wrap owned components in a system boundary; keep the LLM providers, documentation servers, pricing API, and email provider outside it as external APIs; group into Client / Edge / Application / Data tiers; label every edge with what flows and how (REST/HTTPS, NDJSON stream, LLM function calls, MCP lookups, async writes); mark the streaming generation path and the human-in-the-loop pause/resume path distinctly.`,
+  },
+  {
+    id: 'this-app-lld',
+    title: 'Low-level design: this app’s generation pipeline',
+    tagline: 'A meta example: the agentic loop behind this tool — coordinator, action groups, reviewer, HITL, session memory',
+    services: ['Controller', 'Coordinator', 'Interface', 'Service class', 'Repository', 'DB Table'],
+    prompt: `Draw a generic low-level design (LLD) diagram — class/component level, no infrastructure — of the AGENTIC GENERATION MODULE inside an AI architecture-design tool (the very pipeline producing this diagram).
+
+SCOPE: one deployable service that turns a chat message into reviewed diagram edits through a bounded ReAct loop (reason → act → observe), with human-in-the-loop checkpoints and persistent session memory. Three layers: API layer, Service layer, Data layer.
+
+API LAYER: a ChatTurnController receiving the message, streaming progress events (ChatMessageRequest, TurnResultResponse DTOs), and routing each turn by flow state (open question round, pending approval, new request); an InteractionValidator rejecting answers to closed or superseded question rounds.
+
+SERVICE LAYER: an AgentLoopCoordinator owning the ReAct cycle — it consults a RequirementsAnalyst (extracts the requirement checklist), then iterates ArchitectPlanner (drafts edits chunk by chunk through an LlmClient interface), StructuralValidator (deterministic gap checks), and CoverageReviewer (grades every requirement with evidence) until the review passes, the coverage floor (≥85%) is met at budget exhaustion, or the iteration/time budget runs out; an ActionGroupRegistry declaring the tool collections agents may draw from (guidance lookup, knowledge, diagram editing, validation, pricing); a GuidanceGateway interface with McpDocsAdapter and CachedGuidanceAdapter implementations so official-documentation lookups are swappable and cacheable; a HitlCheckpointPolicy that holds destructive drafts in a pending-apply state until an approval decision arrives (fail-safe: unclear answers reject); a SessionMemoryService deriving durable decisions/constraints each turn and rendering them into every agent's context; a ReActTraceEmitter recording each thought/action/observation; a KnowledgeDistiller consuming ReviewFailedThenFixedEvent to store reusable lessons.
+
+DATA LAYER: an ArchitectureRepository over the architectures table (nodes, edges, containers, optimistic version); a ConversationRepository over the conversations table (messages, flow state, session_memory, pending_apply); a GenerationRunRepository appending every turn's trace steps and model calls to the generation_runs table; a KnowledgeRepository over the knowledge_entries table (house rules, lessons, confidence, usage counts).
+
+CONVENTIONS: dependencies point inward (controller → coordinator/services → repositories → tables); label edges (calls, implements, iterates, grades, holds-for-approval, reads/writes, appends, consumes); group each layer in its own boundary; mark the LlmClient and GuidanceGateway interfaces with their implementations explicitly, and show the ReAct refine cycle (planner → validator → reviewer → planner) and the HITL pending-apply path as distinct loops.`,
+  },
+  {
     id: 'hld-ride-sharing',
     title: 'High-level system design: ride-sharing platform',
     tagline: 'Provider-neutral HLD — clients, edge, services, data, and async flows',

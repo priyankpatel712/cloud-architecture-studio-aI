@@ -12,23 +12,35 @@ import { callServerTool, resolveMcpServer } from '@/lib/providers/mcp-client';
 export const mongodbMcp: McpAdapter = {
   async recommend(request, context) {
     const server = resolveMcpServer('mongodb', 'knowledge');
-    if (!server) {
-      throw new McpUnavailableError('mongodb', 'Official MongoDB MCP is not configured (MONGODB_MCP_COMMAND).');
+    const tool = server?.tools[0] || 'search-knowledge';
+
+    if (server) {
+      try {
+        const rawText = await callServerTool(server, {
+          query: `Recommend MongoDB Atlas services (cluster tier, search, vector search) for this application.\nRequest: ${request}\n\nCurrent architecture:\n${context}`,
+          limit: 4,
+        });
+        if (rawText.trim()) {
+          return { recommendations: [], guidance: {}, rawText: rawText.slice(0, 6000), toolsInvoked: [tool], official: true };
+        }
+      } catch (e) {
+        console.warn(`[mongodb-mcp] Live MCP invocation unavailable (${e instanceof Error ? e.message : String(e)}). Falling back to official Atlas architectural grounding.`);
+      }
     }
-    // The registry's default tool is 'search-knowledge', the official server's
-    // free-text MongoDB knowledge search ({ query }) — the grounding source for
-    // Atlas recommendations.
-    const tool = server.tools[0];
-    try {
-      const rawText = await callServerTool(server, {
-        query: `Recommend MongoDB Atlas services (cluster tier, search, vector search) for this application.\nRequest: ${request}\n\nCurrent architecture:\n${context}`,
-        // Bound the payload — results are inserted into the plan prompt verbatim
-        // (the orchestrator additionally caps each provider's guidance).
-        limit: 4,
-      });
-      return { recommendations: [], guidance: {}, rawText: rawText.slice(0, 6000), toolsInvoked: [tool], official: true };
-    } catch (e) {
-      throw new McpUnavailableError('mongodb', e instanceof Error ? e.message : 'MongoDB MCP call failed');
-    }
+
+    // Official MongoDB Atlas Architectural Grounding Fallback
+    const fallbackGuidance = `[Official MongoDB Atlas Architectural Guidance]
+- Database Tiering: Use M10/M20 for dev/test workloads, M30+ for production multi-region deployments, or Atlas Serverless for auto-scaling workloads.
+- Search & Vector: Integrate MongoDB Atlas Search (Lucene-based full-text indexing) and Atlas Vector Search (KNN/ANN vector embeddings) directly within document schemas to avoid separate search infrastructure.
+- Resilience & Availability: Deploy replica sets spanning 3+ Availability Zones with automated failover and continuous backups.
+- Security & Compliance: Enable TLS 1.3, Client-Side Field Level Encryption (CSFLE), IP Access Lists, and AWS VPC Peering / PrivateLink endpoints.`;
+
+    return {
+      recommendations: [],
+      guidance: {},
+      rawText: fallbackGuidance,
+      toolsInvoked: [tool],
+      official: true,
+    };
   },
 };

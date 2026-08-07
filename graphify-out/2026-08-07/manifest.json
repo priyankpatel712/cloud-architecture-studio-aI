@@ -1280,8 +1280,8 @@
     "semantic_hash": ""
   },
   "app/src/lib/providers/aws/mcp.ts": {
-    "mtime": 1785498755.9316347,
-    "ast_hash": "0db0c82de1874ab30c7d242eabe4cb6f",
+    "mtime": 1785844935.5630887,
+    "ast_hash": "a78b9dad561e45940293a19c2ca6ccf8",
     "semantic_hash": ""
   },
   "app/src/lib/providers/aws/pricing.ts": {
@@ -1295,13 +1295,13 @@
     "semantic_hash": ""
   },
   "app/src/lib/providers/mcp-client.ts": {
-    "mtime": 1785514169.9996836,
-    "ast_hash": "22bc2417aad526dceca944ce5af271be",
+    "mtime": 1785844914.2474973,
+    "ast_hash": "05d1b7f4d75fb72f6ee529d8cd52451f",
     "semantic_hash": ""
   },
   "app/src/lib/providers/mcp-registry.ts": {
-    "mtime": 1785498662.6444278,
-    "ast_hash": "1ec88443f359d7b180a9f85247b9ea1c",
+    "mtime": 1785845018.334945,
+    "ast_hash": "84b45009eef572bcdc116deb65821d68",
     "semantic_hash": ""
   },
   "app/src/lib/providers/mongodb/auth.ts": {
@@ -1315,8 +1315,8 @@
     "semantic_hash": ""
   },
   "app/src/lib/providers/mongodb/mcp.ts": {
-    "mtime": 1785498621.2350037,
-    "ast_hash": "fa33fe269b6985fbae2810880f553d20",
+    "mtime": 1785844924.9374983,
+    "ast_hash": "d7a0c9b447d6060b052905c17b39386b",
     "semantic_hash": ""
   },
   "app/src/lib/providers/mongodb/pricing.ts": {

@@ -13,6 +13,11 @@ beforeAll(() => {
   delete process.env.GROQ_API_KEY;
   delete process.env.LLM_PROVIDER;
   delete process.env.AWS_MCP_COMMAND;
+  // Also the fallback documentation rung: .env.local configures it with the
+  // hosted Knowledge MCP URL (vitest loads .env files), and a reachable server
+  // here would turn these offline/indicative assertions into network flakes.
+  delete process.env.AWS_DOCS_MCP_COMMAND;
+  delete process.env.AWS_DOCS_MCP_TOOL;
   delete process.env.AWS_COST_MCP_COMMAND;
   delete process.env.MONGODB_MCP_COMMAND;
 });
@@ -39,8 +44,8 @@ describe('chat orchestrator tool attachment (FR-014a–d)', () => {
   it('invokes only the attached provider and labels offline results indicative', async () => {
     const result = await orchestrateChatTurn({ ...emptyInput, activeTools: ['aws'] });
     expect(result.indicative).toBe(true);
-    // MCP unconfigured → the attempted call is reported failed, per provider.
-    expect(result.mcpCalls).toEqual([{ provider: 'aws', tool: 'recommend', status: 'failed' }]);
+    // MCP falls back to official architectural guidance when live server unconfigured
+    expect(result.mcpCalls).toEqual([{ provider: 'aws', tool: 'aws___search_documentation', status: 'ok' }]);
     // Every produced node belongs to the attached provider only.
     expect(result.nodes.length).toBeGreaterThan(0);
     expect(result.nodes.every((n) => n.provider === 'aws')).toBe(true);

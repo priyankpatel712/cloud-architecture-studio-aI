@@ -1,8 +1,10 @@
 import { memo, useState } from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
+import { ExternalLink } from 'lucide-react';
 import { ServiceIcon } from '@/components/ui/Icon';
 import { resolveServiceDef, formatUSD } from '@/lib/catalog';
-import { EDGE_COLORS, type EdgeColor } from '@/lib/canvas/model';
+import { EDGE_COLORS, type EdgeColor, type FormatRule } from '@/lib/canvas/model';
+import { evaluateFormatRules } from '@/lib/canvas/conditional-format';
 
 export interface ServiceNodeData {
   serviceId: string;
@@ -15,6 +17,8 @@ export interface ServiceNodeData {
   category?: string;
   /** 007 2.3 — optional user accent override (constrained token) */
   accent?: EdgeColor;
+  /** Lucid-parity hotspot: external URL opened from the node */
+  link?: string;
   [key: string]: unknown;
 }
 
@@ -38,18 +42,27 @@ const HANDLES: { id: string; position: Position }[] = [
   { id: 'left', position: Position.Left },
 ];
 
-/** `onRename` is injected by Canvas's nodeTypes wrapper — not part of React Flow's NodeProps. */
-function ServiceNodeImpl({ id, data, selected, onRename }: NodeProps & { onRename?: (id: string, name: string) => void }) {
+/** `onRename`/`formatRules` are injected by Canvas's nodeTypes wrapper — not part of React Flow's NodeProps. */
+function ServiceNodeImpl({ id, data, selected, onRename, formatRules }: NodeProps & { onRename?: (id: string, name: string) => void; formatRules?: FormatRule[] }) {
   const d = data as ServiceNodeData;
   // Curated catalog entry, or a synthesized def for AI-added dynamic services —
   // a node is never invisible just because the catalog doesn't know its id.
   const svc = resolveServiceDef(d.serviceId, d);
   const [editing, setEditing] = useState(false);
+  // Conditional formatting (Lucid-parity): a matching data rule outranks the
+  // manual accent — a live "over $100/mo" signal must not lose to a cosmetic
+  // choice — and both rank above the catalog color.
+  const ruleAccent = formatRules?.length
+    ? evaluateFormatRules(
+        { cost: d.cost, serviceId: d.serviceId, provider: svc.provider, category: svc.category, displayName: d.displayName },
+        formatRules
+      )
+    : null;
   // 007 2.3 — user accent override: colors the border/ring and the icon tile
   // (the official vendor SVG can't be recolored, so an override switches to the
   // tinted glyph tile).
-  const overridden = d.accent && d.accent !== 'default';
-  const accent = overridden ? EDGE_COLORS[d.accent!] : svc.accent;
+  const overridden = Boolean(ruleAccent) || (d.accent && d.accent !== 'default');
+  const accent = ruleAccent ? EDGE_COLORS[ruleAccent] : overridden ? EDGE_COLORS[d.accent!] : svc.accent;
   const iconDef = overridden ? { ...svc, accent, iconUrl: undefined } : svc;
 
   return (
@@ -97,8 +110,22 @@ function ServiceNodeImpl({ id, data, selected, onRename }: NodeProps & { onRenam
         </div>
       </div>
       <div className="flex items-center justify-between border-t border-[var(--color-surface-variant)] px-3 py-2">
-        <span className="text-[10px] uppercase tracking-wide text-[var(--color-text-secondary)]">
+        <span className="flex items-center gap-1 text-[10px] uppercase tracking-wide text-[var(--color-text-secondary)]">
           {PROVIDER_BADGE[svc.provider] ?? svc.provider}
+          {/* Lucid-parity hotspot: opens the node's linked URL (docs/console/runbook) */}
+          {d.link && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                window.open(d.link, '_blank', 'noopener,noreferrer');
+              }}
+              title={d.link}
+              aria-label={`Open link: ${d.link}`}
+              className="nodrag flex h-4 w-4 items-center justify-center rounded text-[var(--color-primary)] hover:bg-[var(--color-surface-container-low)]"
+            >
+              <ExternalLink size={11} />
+            </button>
+          )}
         </span>
         {/* Generic design components have no SKU — omit the price badge entirely
             rather than showing a misleading $0 (mixed-mode research finding). */}

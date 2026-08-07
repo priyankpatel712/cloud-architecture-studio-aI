@@ -12,6 +12,7 @@
  */
 
 import { AWS_SERVICES, AWS_CONTAINER_TYPES } from '@/lib/providers/aws/catalog';
+import { AWS_EXTENDED_SERVICES } from '@/lib/providers/aws/catalog-extended';
 import { MONGODB_SERVICES, MONGODB_CONTAINER_TYPES } from '@/lib/providers/mongodb/catalog';
 import { SYSTEM_SERVICES, SYSTEM_CONTAINER_TYPES, SYSTEM_ACCENT, SYSTEM_CATEGORY_ACCENTS } from '@/lib/providers/system/catalog';
 import { officialAwsIcon } from '@/lib/providers/aws/icons';
@@ -20,7 +21,13 @@ import type { ContainerTypeDef, ProviderId, ServiceDef, ServiceConfig } from '@/
 export type { FieldType, ConfigField, ServiceDef, ContainerTypeDef } from '@/lib/providers/types';
 export type Provider = ProviderId;
 
-export const SERVICES: ServiceDef[] = [...AWS_SERVICES, ...MONGODB_SERVICES, ...SYSTEM_SERVICES];
+/**
+ * Curated services (config fields + cost models) first, then the extended AWS
+ * set — every remaining official Architecture Icon as a draggable service.
+ * The extended set is palette/canvas only: the server registry (and therefore
+ * every LLM prompt) still sees just the curated catalogs.
+ */
+export const SERVICES: ServiceDef[] = [...AWS_SERVICES, ...AWS_EXTENDED_SERVICES, ...MONGODB_SERVICES, ...SYSTEM_SERVICES];
 
 /**
  * Container types the canvas can draw (002 FR-005): the core generic group plus
@@ -61,6 +68,20 @@ export const CATEGORY_ACCENTS: Record<string, string> = {
   'App Integration': '#E7157B',
   Management: '#E7157B',
   'Machine Learning': '#01A88D',
+  // Extended-catalog categories (official icon-set palette).
+  'Developer Tools': '#C925D1',
+  Migration: '#01A88D',
+  Media: '#ED7100',
+  'Business Apps': '#DD344C',
+  'Front-End & Mobile': '#DD344C',
+  'End User Computing': '#01A88D',
+  'Cost Management': '#7AA116',
+  Healthcare: '#01A88D',
+  Games: '#8C4FFF',
+  Quantum: '#ED7100',
+  Blockchain: '#ED7100',
+  Satellite: '#C925D1',
+  'Support & Enablement': '#C925D1',
 };
 
 /** Provider inferred from a dynamic serviceId slug ('aws-route53' → 'aws'). */

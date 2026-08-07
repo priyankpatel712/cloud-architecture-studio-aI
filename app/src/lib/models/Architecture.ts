@@ -26,6 +26,24 @@ const serviceNodeSchema = new Schema(
     containerId: { type: String, default: null },
     /** 007 2.3 — optional user accent override (constrained token, like edge colors) */
     accent: { type: String, enum: ['default', 'primary', 'success', 'warning', 'danger'], default: 'default' },
+    /** Lucid-parity hotspot — optional external URL opened from the node */
+    link: { type: String, default: '' },
+  },
+  { _id: false }
+);
+
+/**
+ * Lucid-parity conditional formatting — a data-linked styling rule evaluated at
+ * render time (lib/canvas/conditional-format.ts). First match wins; accent uses
+ * the same constrained tokens as manual overrides, never 'default'.
+ */
+const formatRuleSchema = new Schema(
+  {
+    ruleId: { type: String, required: true },
+    field: { type: String, enum: ['cost', 'provider', 'category', 'serviceId', 'name'], required: true },
+    op: { type: String, enum: ['gt', 'gte', 'lt', 'lte', 'eq', 'neq', 'contains'], required: true },
+    value: { type: String, required: true },
+    accent: { type: String, enum: ['primary', 'success', 'warning', 'danger'], required: true },
   },
   { _id: false }
 );
@@ -112,6 +130,8 @@ const architectureSchema = new Schema(
     edges: { type: [serviceEdgeSchema], default: [] },
     containers: { type: [containerSchema], default: [] },
     annotations: { type: [annotationSchema], default: [] },
+    /** Lucid-parity conditional formatting rules; empty on pre-feature documents */
+    formatRules: { type: [formatRuleSchema], default: [] },
     guidance: {
       network: { type: String, default: '' },
       security: { type: String, default: '' },

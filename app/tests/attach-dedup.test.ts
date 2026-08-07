@@ -40,15 +40,21 @@ describe('decideAdds', () => {
   });
 
   // Dynamic services (follow-up: the catalog no longer bounds the AI).
-  // Textract is deliberately not in the curated catalog (Route 53 was promoted).
   it('creates a dynamic service when the plan supplies an identity', () => {
     expect(decideAdds([{ serviceId: 'aws-textract', name: 'Textract' }], kept, new Set(), ['aws'])).toEqual([
       { kind: 'create' },
     ]);
   });
 
-  it('skips a dynamic slug without a name, or for an unattached provider', () => {
-    expect(decideAdds([{ serviceId: 'aws-textract' }], kept, new Set(), ['aws'])).toEqual([{ kind: 'skip' }]);
+  it('creates from a name-less slug the extended icon catalog already knows', () => {
+    // Textract has no curated cost model but IS in the extended official-icon
+    // catalog, so its identity (name, icon, category) is known without the
+    // plan supplying one — only genuinely unknown slugs still need a name.
+    expect(decideAdds([{ serviceId: 'aws-textract' }], kept, new Set(), ['aws'])).toEqual([{ kind: 'create' }]);
+  });
+
+  it('skips an unknown dynamic slug without a name, or an unattached provider', () => {
+    expect(decideAdds([{ serviceId: 'aws-hyperplane-db' }], kept, new Set(), ['aws'])).toEqual([{ kind: 'skip' }]);
     expect(
       decideAdds([{ serviceId: 'atlas-datalake', name: 'Atlas Data Lake' }], kept, new Set(), ['aws'])
     ).toEqual([{ kind: 'skip' }]);

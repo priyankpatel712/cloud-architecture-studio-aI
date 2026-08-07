@@ -107,7 +107,13 @@ export function resolveRoleTiering(stored: boolean | null | undefined): boolean 
  * but only after every unconstrained option, so it acts as a genuine last
  * resort instead of a fast-burning default.
  */
-const DAILY_QUOTA_PROVIDERS: ReadonlySet<LlmProviderId> = new Set(['gemini', 'openrouter']);
+const DAILY_QUOTA_PROVIDERS: ReadonlySet<LlmProviderId> = new Set([
+  'gemini',
+  'openrouter',
+  // Workers AI's free tier is a small daily neuron allocation (~10k/day) that
+  // a few dozen large calls can exhaust — same shape as Gemini's per-day cap.
+  'cloudflare',
+]);
 
 const TIER_PREFERENCES: Record<LlmModelTier, { provider: LlmProviderId; model: string }[]> = {
   small: [
@@ -120,6 +126,9 @@ const TIER_PREFERENCES: Record<LlmModelTier, { provider: LlmProviderId; model: s
     // highest-frequency work back on the largest model, which is the exact
     // load this feature exists to remove.
     { provider: 'nvidia', model: 'meta/llama-3.1-8b-instruct' },
+    // Mistral's free Experiment tier is ~1 req/s — fine as a fourth option for
+    // small work, too tight to lead a chain that fires several times per turn.
+    { provider: 'mistral', model: 'mistral-small-latest' },
     { provider: 'gemini', model: 'gemini-2.5-flash' },
     // Bedrock entries sit last in every tier: selectRoleChain skips providers
     // without a key, so these are inert until a Bedrock key is configured and
@@ -135,6 +144,11 @@ const TIER_PREFERENCES: Record<LlmModelTier, { provider: LlmProviderId; model: s
   // selectRoleChain; it just no longer masquerades as a mid model.
   mid: [
     { provider: 'groq', model: 'llama-3.3-70b-versatile' },
+    // Cerebras answers in well under a second at ~30 req/min with a daily
+    // token pool (~1M) that mid-frequency roles won't exhaust — the natural
+    // second when Groq (the first to rate-limit in practice) is saturated.
+    { provider: 'cerebras', model: 'gemma-4-31b' },
+    { provider: 'mistral', model: 'mistral-medium-latest' },
     { provider: 'huggingface', model: 'meta-llama/Llama-3.3-70B-Instruct' },
     { provider: 'bedrock', model: 'us.amazon.nova-pro-v1:0' },
   ],
@@ -142,6 +156,8 @@ const TIER_PREFERENCES: Record<LlmModelTier, { provider: LlmProviderId; model: s
     { provider: 'nvidia', model: 'nvidia/llama-3.3-nemotron-super-49b-v1' },
     { provider: 'anthropic', model: 'claude-opus-4-8' },
     { provider: 'groq', model: 'openai/gpt-oss-120b' },
+    { provider: 'cerebras', model: 'gpt-oss-120b' },
+    { provider: 'mistral', model: 'mistral-large-latest' },
     { provider: 'bedrock', model: 'us.anthropic.claude-sonnet-4-5-20250929-v1:0' },
   ],
 };

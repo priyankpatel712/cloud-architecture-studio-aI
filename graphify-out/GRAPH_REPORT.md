@@ -1,16 +1,16 @@
-# Graph Report - cloud-architecture-studio-aI  (2026-08-04)
+# Graph Report - cloud-architecture-studio-aI  (2026-08-07)
 
 ## Corpus Check
-- 424 files · ~413,920 words
+- 430 files · ~423,034 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2998 nodes · 5735 edges · 310 communities (197 shown, 113 thin omitted)
-- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 46 edges (avg confidence: 0.66)
+- 3049 nodes · 5853 edges · 314 communities (203 shown, 111 thin omitted)
+- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 50 edges (avg confidence: 0.66)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `11d6ae30`
+- Built from commit: `924a479c`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -107,7 +107,6 @@
 - [[_COMMUNITY_main|main]]
 - [[_COMMUNITY_cost-options.ts|cost-options.ts]]
 - [[_COMMUNITY_Feature Specification Agentic Architecture Generation with Live Working Trace|Feature Specification: Agentic Architecture Generation with Live Working Trace]]
-- [[_COMMUNITY_Contract Guided Generation Flow Protocol|Contract: Guided Generation Flow Protocol]]
 - [[_COMMUNITY_User Scenarios & Testing (mandatory)|User Scenarios & Testing *(mandatory)*]]
 - [[_COMMUNITY_page.tsx|page.tsx]]
 - [[_COMMUNITY_reference-patterns.ts|reference-patterns.ts]]
@@ -311,30 +310,34 @@
 - [[_COMMUNITY_CostEstimateOverride.ts|CostEstimateOverride.ts]]
 - [[_COMMUNITY_SearchBackend|SearchBackend]]
 - [[_COMMUNITY_14.5 Authentication|14.5 Authentication]]
+- [[_COMMUNITY_Contract Guided Generation Flow Protocol|Contract: Guided Generation Flow Protocol]]
+- [[_COMMUNITY_LlmUsage.ts|LlmUsage.ts]]
+- [[_COMMUNITY_cost-options.test.ts|cost-options.test.ts]]
+- [[_COMMUNITY_14.12 Export|14.12 Export]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `fail()` - 97 edges
 2. `requireVerified()` - 79 edges
 3. `connectDB()` - 70 edges
-4. `cn()` - 61 edges
+4. `cn()` - 62 edges
 5. `parseBody()` - 49 edges
-6. `ProviderId` - 39 edges
-7. `resolveServiceDef()` - 37 edges
-8. `runAgentLoop()` - 36 edges
-9. `CanvasImpl()` - 31 edges
+6. `CanvasImpl()` - 39 edges
+7. `ProviderId` - 39 edges
+8. `resolveServiceDef()` - 37 edges
+9. `runAgentLoop()` - 36 edges
 10. `llmAvailable()` - 30 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `CanvasImpl()` --indirect_call--> `edge()`  [INFERRED]
+  app/src/components/studio/Canvas.tsx → app/src/lib/canvas/templates.ts
+- `CanvasImpl()` --indirect_call--> `node()`  [INFERRED]
+  app/src/components/studio/Canvas.tsx → app/src/lib/canvas/templates.ts
 - `CanvasImpl()` --indirect_call--> `scope()`  [INFERRED]
   app/src/components/studio/Canvas.tsx → app/tests/direct-edit.test.ts
+- `previewRoleResolution()` --indirect_call--> `override()`  [INFERRED]
+  app/src/lib/llm.ts → app/tests/overrides.test.ts
 - `StudioInner()` --references--> `jspdf`  [EXTRACTED]
   app/src/app/(dashboard)/studio/page.tsx → app/package.json
-- `postTurn()` --indirect_call--> `line()`  [INFERRED]
-  app/scripts/measure-baseline.mjs → app/tests/overrides.test.ts
-- `ProviderToggle()` --calls--> `cn()`  [EXTRACTED]
-  app/src/app/(dashboard)/projects/new/page.tsx → app/src/lib/cn.ts
-- `ProjectsPage()` --indirect_call--> `key()`  [INFERRED]
-  app/src/app/(dashboard)/projects/page.tsx → app/src/lib/crypto.ts
 
 ## Import Cycles
 - None detected.
@@ -342,35 +345,35 @@
 ## Hyperedges (group relationships)
 - **Spec Kit core SDD lifecycle (specify -> plan -> tasks -> implement)** — claude_skills_speckit_specify_skill_speckit_specify, claude_skills_speckit_plan_skill_speckit_plan, claude_skills_speckit_tasks_skill_speckit_tasks, claude_skills_speckit_implement_skill_speckit_implement [EXTRACTED 0.75]
 
-## Communities (310 total, 113 thin omitted)
+## Communities (314 total, 111 thin omitted)
 
 ### Community 0 - "Constitution & Principles"
 Cohesion: 0.15
 Nodes (12): Phase 0 Research — Cloud Architecture Studio AI MVP, R10. Input validation, R11. Conversational generation (persistent per-project chat), R1. AWS service recommendations & generation, R2. MongoDB Atlas recommendations, R3. Live pricing, R4. AWS account connection (auth), R5. Email delivery (verification + password reset) (+4 more)
 
 ### Community 1 - "Admin Panel UI"
-Cohesion: 0.09
-Nodes (30): AdminLayout(), AdminOverview(), CAPS, ROLE_ICON, RolesPage(), UsersPage(), active(), AdminShell() (+22 more)
+Cohesion: 0.13
+Nodes (16): ProfileSection(), active(), AdminShell(), NAV, RoleBadge(), StatusBadge(), statusVariant, variant (+8 more)
 
 ### Community 2 - "AI Generator Page"
 Cohesion: 0.13
 Nodes (10): AwsSection(), ConnectionView, DeviceInfo, timeUntil(), AuthShell(), noopSubscribe(), Button(), ButtonProps (+2 more)
 
 ### Community 3 - "Auth & Admin APIs"
-Cohesion: 0.21
-Nodes (25): POST(), POST(), POST(), POST(), POST(), POST(), POST(), GET() (+17 more)
+Cohesion: 0.18
+Nodes (31): POST(), POST(), GET(), PATCH(), serializeMe(), POST(), POST(), POST() (+23 more)
 
 ### Community 4 - "Architecture Studio Canvas"
-Cohesion: 0.18
-Nodes (12): ApprovalDecision, buildApprovalQuestion(), decisionFromAnswers(), DESTRUCTIVE_REMOVAL_THRESHOLD, destructiveChangeCheckpoint(), HitlCheckpoint, HitlKind, interpretApprovalReply() (+4 more)
+Cohesion: 0.21
+Nodes (10): ApprovalDecision, decisionFromAnswers(), DESTRUCTIVE_REMOVAL_THRESHOLD, destructiveChangeCheckpoint(), HitlCheckpoint, HitlKind, interpretApprovalReply(), lowCoverageCheckpoint() (+2 more)
 
 ### Community 5 - "Dependencies & Packaging"
 Cohesion: 0.09
 Nodes (23): dependencies, @anthropic-ai/sdk, @aws-sdk/client-pricing, @aws-sdk/client-sso, @aws-sdk/client-sso-oidc, bcryptjs, class-variance-authority, clsx (+15 more)
 
 ### Community 7 - "Dashboard & Connections UI"
-Cohesion: 0.11
-Nodes (25): ApiProject, ConnectionView, Dashboard(), expiresIn(), relativeTime(), ApiProject, Filter, filters (+17 more)
+Cohesion: 0.13
+Nodes (22): FormatRulesPanel(), HANDLES, PROVIDER_BADGE, ServiceNode, ServiceNodeData, ACCENTS, describeRule(), evaluateFormatRules() (+14 more)
 
 ### Community 8 - "TypeScript Config"
 Cohesion: 0.10
@@ -394,7 +397,7 @@ Nodes (3): csp, nextConfig, securityHeaders
 
 ### Community 17 - "Next Env Types"
 Cohesion: 0.09
-Nodes (54): POST(), DELETE(), POST(), GET(), PUT(), POST(), GET(), GET() (+46 more)
+Nodes (49): POST(), GET(), PUT(), GET(), GET(), POST(), createSchema, GET() (+41 more)
 
 ### Community 19 - "Frontend Design Skill"
 Cohesion: 0.29
@@ -402,11 +405,11 @@ Nodes (6): Design principles, Frontend Design, Ground it in the subject, More on
 
 ### Community 30 - "cn"
 Cohesion: 0.07
-Nodes (33): CREATE_STEP, OPEN_STEP, ProviderToggle(), ChatArchitecture, ChatCoverageItem, ChatFlow, ChatInteraction, ChatInteractionResponse (+25 more)
+Nodes (40): CREATE_STEP, OPEN_STEP, ProviderToggle(), ChatArchitecture, ChatCoverageItem, ChatFlow, ChatInteraction, ChatInteractionResponse (+32 more)
 
 ### Community 31 - "trace-emitter.ts"
 Cohesion: 0.05
-Nodes (39): ACTION_GROUPS, actionGroup, AgentTool, AgentToolKind, groupForTool(), renderActionGroupManifest(), AGENT_ROSTER, agentById() (+31 more)
+Nodes (38): ACTION_GROUPS, actionGroup, AgentTool, AgentToolKind, groupForTool(), renderActionGroupManifest(), AGENT_ROSTER, agentById() (+30 more)
 
 ### Community 32 - "User Scenarios & Testing *(mandatory)*"
 Cohesion: 0.05
@@ -414,35 +417,35 @@ Nodes (40): Chat & AI Generation (FR-014a–d, FR-015, FR-016a), Dependencies & 
 
 ### Community 33 - "orchestrator.ts"
 Cohesion: 0.08
-Nodes (36): clampToFieldBounds(), defaultConfig(), providerFromSlug(), validServiceId(), repriceNode(), CHUNK_SIZE, AddDecision, applyAddMerge() (+28 more)
+Nodes (36): CHUNK_SIZE, AddDecision, applyAddMerge(), asArray(), asConfig(), asNum(), asObj(), asStr() (+28 more)
 
 ### Community 34 - "agent-loop.ts"
-Cohesion: 0.09
-Nodes (27): ChunkRoundsInput, ChunkRoundsOutcome, forInterimEmit(), LoopTerminalStatus, outOfScopeViolations(), protectedViolations(), runChunkRounds(), sanitizeUnderstanding() (+19 more)
+Cohesion: 0.10
+Nodes (34): COVERAGE_TARGET_PERCENT, CoverageItem, coveragePercent(), coverageSummary(), meetsCoverageTarget(), unmetRequirements(), buildResult(), ChunkRoundsOutcome (+26 more)
 
 ### Community 35 - "route.ts"
-Cohesion: 0.20
-Nodes (38): answerOnlyTurn(), closeStoredRound(), createRun(), currentBrief(), distillTurnLesson(), emitUnsatisfiable(), endTurnWithAnswer(), endTurnWithRound() (+30 more)
+Cohesion: 0.19
+Nodes (30): answerOnlyTurn(), createRun(), emitUnsatisfiable(), endTurnWithAnswer(), findInteraction(), FlowPhase, flowSnapshot(), handleResolvedIntent() (+22 more)
 
 ### Community 36 - "Canvas.tsx"
-Cohesion: 0.04
-Nodes (77): edgeTypes, nodeTypes, ShareInner(), AlignmentGuides(), AnnotationNode, AnnotationNodeExtra, CanvasImpl(), CanvasProps (+69 more)
+Cohesion: 0.11
+Nodes (28): CANVAS_BACKGROUNDS, CanvasBackground, CanvasImpl(), cloneEdge(), cloneNode(), edgeTypes, fallbackSize(), IconButton() (+20 more)
 
 ### Community 37 - "Contract: Projects & Architecture (FR-022, FR-023)"
 Cohesion: 0.06
 Nodes (30): AWS — IAM Identity Center (SSO)  (FR-011, FR-012), Contract: Provider Connections (FR-011, FR-012, FR-013), `GET /api/connections`, MongoDB Atlas  (FR-013), Contract: Export (FR-024), `GET /api/projects/[id]/export?format=png|pdf|mermaid|json`, Contract: Conversational Architecture Generation (FR-014, FR-014a–d, FR-015, FR-016a), Direct-edit context sync (FR-016a; US2/AC4) (+22 more)
 
 ### Community 38 - "types.ts"
-Cohesion: 0.10
-Nodes (17): awsMcp, AWS_RULES, MONGODB_SERVICES, mongodbMcp, mongodbPricing, MONGODB_RULES, allProviders(), plugins (+9 more)
+Cohesion: 0.14
+Nodes (12): AWS_RULES, ATLAS_MONTHLY, MONGODB_CONTAINER_TYPES, MONGODB_SERVICES, mongodbPricing, MONGODB_RULES, allProviders(), plugins (+4 more)
 
 ### Community 39 - "cost-estimate.ts"
-Cohesion: 0.16
-Nodes (21): COST_PLAN_SCHEMA, CostOverrideIntent, CostPlan, CostTurnNode, CostTurnResult, applyQuantityOverrides(), MergedEstimate, MergedLine (+13 more)
+Cohesion: 0.13
+Nodes (24): COST_PLAN_SCHEMA, CostOverrideIntent, CostPlan, CostTurnNode, CostTurnResult, applyQuantityOverrides(), MergedEstimate, MergedLine (+16 more)
 
 ### Community 40 - "schemas.ts"
-Cohesion: 0.08
-Nodes (28): annotationSchema, architecturePutSchema, chatMessageSchema, chatStartSchema, containerSchema, costOverridePatchSchema, edgeStyleSchema, emailLoose (+20 more)
+Cohesion: 0.07
+Nodes (34): POST(), DELETE(), POST(), sharedWithView(), annotationSchema, chatMessageSchema, chatStartSchema, containerSchema (+26 more)
 
 ### Community 41 - "User Scenarios & Testing *(mandatory)*"
 Cohesion: 0.06
@@ -450,27 +453,27 @@ Nodes (31): Content Quality, Feature Readiness, Notes, Requirement Completeness,
 
 ### Community 42 - "route.ts"
 Cohesion: 0.10
-Nodes (32): POST(), POST(), POST(), GET(), PUT(), settingsView(), POST(), decryptSecret() (+24 more)
+Nodes (29): POST(), POST(), DELETE(), POST(), GET(), toConnectionView(), decryptSecret(), encryptSecret() (+21 more)
 
 ### Community 43 - "model.ts"
 Cohesion: 0.17
 Nodes (12): devDependencies, eslint, eslint-config-next, tailwindcss, @tailwindcss/postcss, tsx, @types/node, @types/nodemailer (+4 more)
 
 ### Community 44 - "flow.ts"
-Cohesion: 0.10
-Nodes (26): TurnCtx, activeRequirements(), AwaitingKind, BriefCapability, briefContext(), CapabilityStatus, defaultsDisclosure(), describeResponse() (+18 more)
+Cohesion: 0.11
+Nodes (21): activeRequirements(), AwaitingKind, BriefCapability, briefContext(), CapabilityStatus, defaultsDisclosure(), InteractionKind, InteractionStatus (+13 more)
 
 ### Community 45 - "Implementation Plan: Multi-Agent Generation with Conversation Memory, Knowledge Store & Model Tiering"
 Cohesion: 0.14
 Nodes (14): 1.1 Why follow-up / modification requests are misunderstood, 1.2 Why rate limits get hit, 1.3 Existing knowledge reuse (build on, don't duplicate), 1. Current-State Findings (verified against code), 4. Constraints, Risks, Mitigations, Complexity Tracking, Constitution Check, Documentation (this feature) (+6 more)
 
 ### Community 46 - "store.ts"
-Cohesion: 0.29
-Nodes (9): DELETE(), PATCH(), requireManager(), requireObjectId(), serializeEntry(), KnowledgeEntryDoc, knowledgeEntrySchema, knowledgeListQuerySchema (+1 more)
+Cohesion: 0.27
+Nodes (10): DELETE(), PATCH(), requireManager(), requireObjectId(), GET(), serializeEntry(), KnowledgeEntryDoc, knowledgeEntrySchema (+2 more)
 
 ### Community 47 - "llm.ts"
 Cohesion: 0.10
-Nodes (30): bedrockRegion(), callAnthropic(), callBedrock(), callOpenAiCompatible(), callProvider(), completeOnce(), CompletionOpts, extractJson() (+22 more)
+Nodes (32): bedrockRegion(), callAnthropic(), callBedrock(), callOpenAiCompatible(), callProvider(), cloudflareAccountId(), completeOnce(), extractJson() (+24 more)
 
 ### Community 48 - "Tasks: [FEATURE NAME]"
 Cohesion: 0.07
@@ -481,24 +484,24 @@ Cohesion: 0.08
 Nodes (25): 1. Initialize Analysis Context, 2. Load Artifacts (Progressive Disclosure), 3. Build Semantic Models, 4. Detection Passes (Token-Efficient Analysis), 5. Severity Assignment, 6. Produce Compact Analysis Report, 7. Provide Next Actions, 8. Offer Remediation (+17 more)
 
 ### Community 50 - "page.tsx"
-Cohesion: 0.06
-Nodes (37): ACCENTS, AiProviderSection(), AiUsagePanel(), AppearanceSection(), compact, KnowledgeEntryView, KnowledgeSection(), LlmSettingsView (+29 more)
+Cohesion: 0.09
+Nodes (15): ACCENTS, AiProviderSection(), AiUsagePanel(), AppearanceSection(), compact, KnowledgeEntryView, KnowledgeSection(), LlmSettingsView (+7 more)
 
 ### Community 51 - "parse.ts"
-Cohesion: 0.18
-Nodes (21): CATEGORY_FALLBACK, NEXT, suggestNextServices(), serviceById(), SERVICES, asArray(), asNum(), asObj() (+13 more)
+Cohesion: 0.25
+Nodes (17): providerFromSlug(), asArray(), asNum(), asObj(), asPosition(), asStr(), cleanLabel(), detectImportFormat() (+9 more)
 
 ### Community 52 - "SKILL.md"
 Cohesion: 0.08
 Nodes (25): 1. Initialize Analysis Context, 2. Load Artifacts (Progressive Disclosure), 3. Build Semantic Models, 4. Detection Passes (Token-Efficient Analysis), 5. Severity Assignment, 6. Produce Compact Analysis Report, 7. Provide Next Actions, 8. Offer Remediation (+17 more)
 
 ### Community 53 - "page.tsx"
-Cohesion: 0.07
-Nodes (25): ApiDocument, StudioInner(), toArchDocument(), SharePayload, Canvas, CanvasApi, CanvasStats, ChatPanel() (+17 more)
+Cohesion: 0.09
+Nodes (25): ApiProject, Filter, filters, MenuItem(), ProjectRow(), ProjectsPage(), PROVIDER_SHORT, relativeTime() (+17 more)
 
 ### Community 54 - "ArchNode"
-Cohesion: 0.15
-Nodes (21): PendingApply, AgentLoopInput, AgentLoopResult, LoopState, AnalyzeInput, assignEdgeSides(), isSide(), nodeCenters() (+13 more)
+Cohesion: 0.12
+Nodes (25): PendingApply, AgentLoopInput, AgentLoopResult, ChunkRoundsInput, LoopState, AnalyzeInput, assignEdgeSides(), isSide() (+17 more)
 
 ### Community 55 - "Tasks: Reliable AWS-MCP Generation with Attachable Services and Editable Cost Estimation"
 Cohesion: 0.09
@@ -509,16 +512,16 @@ Cohesion: 0.06
 Nodes (33): Dependencies & Execution Order, Format: `[ID] [P?] [Story] Description`, Implementation for User Story 1, Implementation for User Story 2, Implementation for User Story 3, Implementation for User Story 4, Implementation for User Story 5, Implementation Strategy (+25 more)
 
 ### Community 57 - "mcp-client.ts"
-Cohesion: 0.11
-Nodes (25): main(), withTimeout(), AWS_REGION_AVAILABILITY_CACHE_TTL_MS, AWS_PRODUCT_NAMES, checkAwsRegionalAvailability(), readCachedAvailability(), RegionalAvailability, searchServer() (+17 more)
+Cohesion: 0.15
+Nodes (17): main(), withTimeout(), callMcpTool(), clients, connect(), extractHttpUrl(), getMcpClient(), listMcpTools() (+9 more)
 
 ### Community 58 - "route.ts"
 Cohesion: 0.18
 Nodes (11): scripts, baseline, build, dev, lint, mcp:doctor, models:check, seed (+3 more)
 
 ### Community 59 - "serialize.ts"
-Cohesion: 0.15
-Nodes (17): ExportAnnotation, ExportContainer, ExportEdge, ExportGuidance, ExportNode, mermaidId(), mermaidLabel(), nodeLine() (+9 more)
+Cohesion: 0.12
+Nodes (23): Format, FORMATS, GET(), ExportAnnotation, ExportContainer, ExportEdge, ExportGuidance, ExportNode (+15 more)
 
 ### Community 60 - "finalize.ts"
 Cohesion: 0.16
@@ -526,67 +529,71 @@ Nodes (16): buildTree(), ElkNode, FLOW_OPTIONS, LayoutEdge, LayoutNode, LayoutRe
 
 ### Community 61 - "analyze.ts"
 Cohesion: 0.16
-Nodes (18): ANALYZE_SCHEMA, analyzeRequest(), AnalyzeResult, asArray(), asObj(), asStr(), briefFromAnalysis(), INTERPRET_SCHEMA (+10 more)
+Nodes (20): distillTurnLesson(), ANALYZE_SCHEMA, analyzeRequest(), AnalyzeResult, asArray(), asObj(), asStr(), briefFromAnalysis() (+12 more)
 
 ### Community 62 - "intent.ts"
 Cohesion: 0.09
-Nodes (29): applyDirectEdit(), DirectEditArch, DirectEditContainer, DirectEditEdge, DirectEditNode, DirectEditResult, pruneEmptyContainers(), refuse() (+21 more)
+Nodes (31): clampToFieldBounds(), applyDirectEdit(), DirectEditArch, DirectEditContainer, DirectEditEdge, DirectEditNode, DirectEditResult, pruneEmptyContainers() (+23 more)
+
+### Community 63 - "mcp.ts"
+Cohesion: 0.14
+Nodes (15): AWS_REGION_AVAILABILITY_CACHE_TTL_MS, ServiceRegionAvailabilityDoc, serviceRegionAvailabilitySchema, AWS_PRODUCT_NAMES, awsMcp, checkAwsRegionalAvailability(), readCachedAvailability(), RegionalAvailability (+7 more)
 
 ### Community 64 - "types.ts"
-Cohesion: 0.29
-Nodes (8): upsertOnce(), contentHash(), isProjectSpecific(), KnowledgeKind, KnowledgeSource, normalizeText(), scoreEntry(), selectRelevant()
+Cohesion: 0.09
+Nodes (23): ApiDocument, MiniMapPanel(), absolutePosition(), CaptureRect, focusBounds(), AnnotationColor, ArchDocument, CanvasNodeType (+15 more)
 
 ### Community 65 - "Tasks: Agentic Architecture Generation with Live Working Trace"
 Cohesion: 0.10
 Nodes (21): Format: `[ID] [P?] [Story] Description`, Implementation for User Story 1, Implementation for User Story 2, Implementation for User Story 3, Implementation Strategy, Incremental Delivery, MVP First (User Story 1 only), Notes (+13 more)
 
 ### Community 66 - "catalog.ts"
-Cohesion: 0.11
-Nodes (21): CATEGORY_ACCENTS, DynamicServiceMeta, Provider, AWS_CONTAINER_TYPES, AWS_REGIONS, EC2_HOURLY, ATLAS_MONTHLY, MONGODB_CONTAINER_TYPES (+13 more)
+Cohesion: 0.09
+Nodes (25): Palette(), ServiceIcon(), CATEGORY_FALLBACK, NEXT, suggestNextServices(), DIAGRAM_TEMPLATES, CATEGORY_ACCENTS, DynamicServiceMeta (+17 more)
 
 ### Community 67 - "prd.md"
 Cohesion: 0.10
 Nodes (19): 10. Data Model, 11. API Modules, 12. Success Metrics, 13. Future Roadmap, 15. Open Source Projects for Inspiration, 1. Executive Summary, 2. Problem Statement, 3. Goals (+11 more)
 
 ### Community 68 - "14. Reference Resources & Open Source Dependencies"
-Cohesion: 0.10
-Nodes (20): 14.10 Forms, 14.11 Charts, 14.12 Export, 14.4 AI Integration, 14.6 Database, 14.7 UI Components, 14.9 Validation, 14. Reference Resources & Open Source Dependencies (+12 more)
+Cohesion: 0.12
+Nodes (17): 14.10 Forms, 14.11 Charts, 14.3 Diagram Generation, 14.6 Database, 14.8 State Management, 14.9 Validation, 14. Reference Resources & Open Source Dependencies, AWS Architecture Icons Package (+9 more)
 
 ### Community 69 - "Architecture.ts"
-Cohesion: 0.18
-Nodes (10): annotationSchema, ArchAnnotation, ArchContainer, architectureSchema, containerSchema, edgeStyleSchema, ServiceEdge, serviceEdgeSchema (+2 more)
+Cohesion: 0.12
+Nodes (14): GET(), POST(), annotationSchema, ArchAnnotation, ArchContainer, architectureSchema, containerSchema, edgeStyleSchema (+6 more)
 
 ### Community 70 - "page.tsx"
 Cohesion: 0.22
 Nodes (5): createReActLog(), PHASE_LABEL, ReActEntry, ReActLog, ReActPhase
 
 ### Community 71 - "OrthogonalEdge.tsx"
-Cohesion: 0.22
-Nodes (16): OrthogonalEdgeImpl(), positionToSide, DEFAULT_EDGE_STYLE, OrthogonalEdgeData, elbowCandidates(), inflate(), orthogonalRoute(), pathCost() (+8 more)
+Cohesion: 0.21
+Nodes (17): OrthogonalEdgeImpl(), positionToSide, absolutePosition(), DEFAULT_EDGE_STYLE, OrthogonalEdgeData, elbowCandidates(), inflate(), orthogonalRoute() (+9 more)
 
 ### Community 72 - "ProviderId"
-Cohesion: 0.15
-Nodes (8): AgentLoopContext, cacheKeys(), mongoGuidanceCache, MCP_GUIDANCE_CACHE_TTL_MS, autoLayout(), GuidanceCachePort, McpGuidanceCacheDoc, mcpGuidanceCacheSchema
+Cohesion: 0.09
+Nodes (17): AgentLoopContext, cacheKeys(), mongoGuidanceCache, ABORT_THRESHOLD_MS, CHUNK_PLAN_DELAY_MS, CHUNK_RENDER_DELAY_MS, CHUNK_ROUND_BUDGET, COST_QUESTION_LIMIT (+9 more)
 
 ### Community 73 - "llmJson"
-Cohesion: 0.17
-Nodes (13): envProvider(), inCooldown(), llmJson(), previewRoleResolution(), resolveLlmConfig(), resolveLlmConfigFrom(), resolveLlmConfigs(), roleOverride() (+5 more)
+Cohesion: 0.29
+Nodes (5): envProvider(), resolveLlmConfig(), resolveLlmConfigFrom(), LLM_ENV, saved
 
 ### Community 74 - "AIConversation.ts"
-Cohesion: 0.06
-Nodes (43): architectureFacts(), ArchitectureReport, CLIENT_REPORT_SCHEMA, ClientProposalReport, degradedClientProposal(), degradedReport(), getOrGenerateClientProposal(), getOrGenerateReport() (+35 more)
+Cohesion: 0.22
+Nodes (13): degradedWalkthrough(), flowDepths(), listNames(), nameMap(), sanitizeWalkthrough(), WalkthroughArch, walkthroughFacts(), WalkthroughReport (+5 more)
 
 ### Community 75 - "Tasks: Incremental Diagram Build-Up During Generation"
 Cohesion: 0.11
 Nodes (19): Format: `[ID] [P?] [Story] Description`, Implementation for User Story 1, Implementation for User Story 2, Implementation Strategy, Incremental Delivery, MVP First (User Story 1 Only), Notes, Parallel Example: Phase 2 (Foundational) (+11 more)
 
 ### Community 76 - "route.ts"
-Cohesion: 0.19
-Nodes (14): createSchema, GET(), POST(), DELETE(), loadThread(), PATCH(), patchSchema, POST() (+6 more)
+Cohesion: 0.24
+Nodes (13): DELETE(), Params, PATCH(), GET(), POST(), serializeUser(), BCRYPT_ROUNDS, cookieOptions (+5 more)
 
 ### Community 77 - "llm-usage.ts"
-Cohesion: 0.21
-Nodes (14): GET(), LlmModelTier, isLlmRole(), ConnectionUsage, isUsageWindow(), RoleUsage, summarizeUsage(), tierOfBucket() (+6 more)
+Cohesion: 0.19
+Nodes (15): GET(), LlmModelTier, RoleResolution, isLlmRole(), ConnectionUsage, isUsageWindow(), RoleUsage, summarizeUsage() (+7 more)
 
 ### Community 78 - "walkthrough.ts"
 Cohesion: 0.35
@@ -597,12 +604,12 @@ Cohesion: 0.11
 Nodes (18): 6. Functional Requirements, AWS, AWS, AWS MCP, Module 10 – Live Pricing, Module 11 – Export, Module 1 – User Authentication, Module 2 – AWS Account Connection (+10 more)
 
 ### Community 80 - "direct-edit.ts"
-Cohesion: 0.29
-Nodes (6): crossCheckTopology(), labelOf(), pyIdent(), pyStr(), toDiagramsCode(), resolveMcpServer()
+Cohesion: 0.21
+Nodes (13): llmJson(), LlmRuntimeConfig, roleOverride(), DAILY_QUOTA_PROVIDERS, LLM_ROLES, resolveRoleTiering(), ROLE_TIERS, selectRoleChain() (+5 more)
 
 ### Community 81 - "pricing.ts"
-Cohesion: 0.27
-Nodes (9): AWS_SERVICES, awsPricing, cache, extractUsdRate(), indicative(), num(), REGION_LOCATION, viaCostMcp() (+1 more)
+Cohesion: 0.17
+Nodes (13): AWS_CONTAINER_TYPES, AWS_REGIONS, AWS_SERVICES, EC2_HOURLY, awsPricing, cache, extractUsdRate(), indicative() (+5 more)
 
 ### Community 82 - "Tasks: Cloud Architecture Studio AI — MVP"
 Cohesion: 0.12
@@ -621,16 +628,16 @@ Cohesion: 0.36
 Nodes (7): deriveBriefMemory(), mergeSessionMemory(), normalize(), renderSessionMemory(), sanitize(), SessionMemoryEntry, SessionMemoryKind
 
 ### Community 86 - "web-search.ts"
-Cohesion: 0.20
-Nodes (15): renderKnowledgeBlock(), gatherKnowledge(), GatherKnowledgeInput, SUMMARY_SCHEMA, braveBackend(), disabledBackend, getSearchBackend(), isAllowedUrl() (+7 more)
+Cohesion: 0.32
+Nodes (16): closeStoredRound(), currentBrief(), endTurnWithRound(), persistStoppedShortTurn(), preservedFromArch(), routeFreeTextDuringRound(), routeTurn(), runAnalyzeTurn() (+8 more)
 
 ### Community 87 - "Execution Steps"
 Cohesion: 0.12
 Nodes (15): 1. Initialize Convergence Context, 2. Load Artifacts (Progressive Disclosure), 3. Build the Intent Inventory, 4. Assess the Codebase and Classify Findings, 5. Assign Severity, 6. Present the In-Session Findings Summary, 7. Append Convergence Tasks (or report converged), 8. Provide Next Actions (Handoff) (+7 more)
 
 ### Community 88 - "guides.ts"
-Cohesion: 0.32
-Nodes (6): lookupAwsIcon(), entries, normalize(), officialAwsIcon(), OfficialIcon, stripped
+Cohesion: 0.12
+Nodes (15): edgeTypes, nodeTypes, ShareInner(), SharePayload, AnnotationNode, AnnotationNodeExtra, ContainerNode, ContainerNodeExtra (+7 more)
 
 ### Community 89 - "topology.ts"
 Cohesion: 0.22
@@ -649,16 +656,12 @@ Cohesion: 0.26
 Nodes (11): ACTIVE_SET, DESIGN_STEPS, limitFlag, main(), outFlag, POST, postTurn(), REQUEST_SET (+3 more)
 
 ### Community 93 - "cost-options.ts"
-Cohesion: 0.21
-Nodes (17): applyOptionToNodes(), asArray(), asConfigPatch(), asObj(), asStr(), COST_QUESTIONS_SCHEMA, fallbackRawOption(), fieldSpec() (+9 more)
+Cohesion: 0.23
+Nodes (15): applyOptionToNodes(), asArray(), asConfigPatch(), asObj(), asStr(), COST_QUESTIONS_SCHEMA, fallbackRawOption(), fieldSpec() (+7 more)
 
 ### Community 94 - "Feature Specification: Agentic Architecture Generation with Live Working Trace"
 Cohesion: 0.14
 Nodes (14): Assumptions, Clarifications, Edge Cases, Feature Specification: Agentic Architecture Generation with Live Working Trace, Functional Requirements, Key Entities, Measurable Outcomes, Requirements *(mandatory)* (+6 more)
-
-### Community 95 - "Contract: Guided Generation Flow Protocol"
-Cohesion: 0.19
-Nodes (7): 1. `POST /api/projects/[id]/chat/messages` — request body (additive), 2. Turn routing (server-side, single route), 3. NDJSON stream — event additions (additive), 4. `GET /api/projects/[id]/chat` — response (additive), 5. UI contract (ChatPanel interaction blocks), 6. Backward compatibility, Contract: Guided Generation Flow Protocol
 
 ### Community 96 - "User Scenarios & Testing *(mandatory)*"
 Cohesion: 0.14
@@ -669,8 +672,8 @@ Cohesion: 0.36
 Nodes (6): asObj(), REVIEW_SCHEMA, reviewDraft(), ReviewInput, ReviewVerdict, sanitizeVerdict()
 
 ### Community 98 - "reference-patterns.ts"
-Cohesion: 0.45
-Nodes (8): matchReferencePatterns(), parsePatternEntry(), patternGrounding(), patternsFromEntries(), REFERENCE_PATTERNS, ReferencePattern, selectPatterns(), matchPatternsWithStore()
+Cohesion: 0.11
+Nodes (18): AIConversationDoc, briefSchema, ConversationBrief, ConversationFlow, ConversationInteraction, ConversationMessage, ConversationPricingOption, conversationSchema (+10 more)
 
 ### Community 99 - "Cloud Architecture Studio AI — Constitution"
 Cohesion: 0.15
@@ -685,20 +688,16 @@ Cohesion: 0.15
 Nodes (13): Assumptions, Edge Cases, Feature Specification: Guided Diagram Generation Flow, Functional Requirements, Key Entities, Measurable Outcomes, Requirements *(mandatory)*, Success Criteria *(mandatory)* (+5 more)
 
 ### Community 103 - "seed.ts"
-Cohesion: 0.24
-Nodes (9): main(), serializePattern(), CORE_RULES, reseedKnowledge(), ReseedResult, pruneKnowledge(), upsertKnowledge(), allProviderRules() (+1 more)
+Cohesion: 0.14
+Nodes (23): GET(), POST(), GET(), POST(), POST(), GET(), PUT(), settingsView() (+15 more)
 
 ### Community 104 - "report.ts"
-Cohesion: 0.50
-Nodes (7): isEnabled(), recordKnowledgeUsage(), recordUsageOnce(), retrieveKnowledge(), retrievePatternEntries(), topKFromEnv(), withDeadline()
+Cohesion: 0.67
+Nodes (3): AgentDefinition, CompletionOpts, LlmRole
 
 ### Community 105 - "router.ts"
-Cohesion: 0.13
-Nodes (22): DraftInput, GatherResult, TurnInput, TurnResult, CLOUD_PROVIDERS, DesignMode, fallbackRoute(), ROUTE_SCHEMA (+14 more)
-
-### Community 106 - "llm-roles.ts"
-Cohesion: 0.26
-Nodes (9): LlmRuntimeConfig, DAILY_QUOTA_PROVIDERS, LLM_ROLES, ROLE_TIERS, selectRoleChain(), TIER_PREFERENCES, llmSettingsPutSchema, allConfigured (+1 more)
+Cohesion: 0.05
+Nodes (64): main(), matchReferencePatterns(), parsePatternEntry(), patternGrounding(), patternsFromEntries(), REFERENCE_PATTERNS, ReferencePattern, selectPatterns() (+56 more)
 
 ### Community 107 - "Entities"
 Cohesion: 0.17
@@ -741,12 +740,12 @@ Cohesion: 0.25
 Nodes (8): 3. Phased Delivery, Phase 0 — Prerequisites (before any behavior change), Phase 1 — Follow-up understanding (fixes the reported defect), Phase 2 — Model tiering & rate-limit resilience, Phase 3 — Knowledge store, Phase 4 — Web research + MCP registry, Phase 5 — Surface & observability, Success-criteria traceability
 
 ### Community 117 - "ExplainFlow.tsx"
-Cohesion: 0.14
-Nodes (16): CostPanel(), Estimate, EstimateLine, OverrideState, ArchitectureReportView, ClientProposalReportView, ExplainFlow(), flowDepths() (+8 more)
+Cohesion: 0.11
+Nodes (26): StudioInner(), toArchDocument(), Canvas, CanvasProps, CanvasStats, ChatPanel(), CostPanel(), Estimate (+18 more)
 
 ### Community 118 - "edge-sides.ts"
-Cohesion: 0.20
-Nodes (15): COVERAGE_TARGET_PERCENT, CoverageItem, coveragePercent(), coverageSummary(), meetsCoverageTarget(), unmetRequirements(), buildResult(), runAgentLoop() (+7 more)
+Cohesion: 0.21
+Nodes (11): AlignmentGuides(), alignBoxes(), AlignMode, DistributeAxis, distributeBoxes(), Box, computeGuides(), GuideLine (+3 more)
 
 ### Community 119 - "SKILL.md"
 Cohesion: 0.18
@@ -781,12 +780,12 @@ Cohesion: 0.18
 Nodes (11): `ConversationContext`, `EditScope`, Entity Relationships, Extended Collection: `AIConversation`, Extended Collection: `LlmSettings`, Migration Notes, New Collection: `KnowledgeEntry`, New Collection: `LlmUsage` (+3 more)
 
 ### Community 127 - "route.ts"
-Cohesion: 0.45
-Nodes (9): DELETE(), Params, PATCH(), GET(), POST(), parseBody(), serializeUser(), canManageRole() (+1 more)
+Cohesion: 0.15
+Nodes (15): architectureFacts(), ArchitectureReport, CLIENT_REPORT_SCHEMA, ClientProposalReport, degradedClientProposal(), degradedReport(), getOrGenerateClientProposal(), getOrGenerateReport() (+7 more)
 
 ### Community 128 - "conversation-context.ts"
-Cohesion: 0.29
-Nodes (5): buildConversationContext(), ContextMessage, ContextOptions, renderLine(), truncate()
+Cohesion: 0.28
+Nodes (4): ContextMessage, ContextOptions, renderLine(), truncate()
 
 ### Community 129 - "Feature Specification: Reliable AWS-MCP Generation with Attachable Services and Editable Cost Estimation"
 Cohesion: 0.20
@@ -829,8 +828,8 @@ Cohesion: 0.25
 Nodes (7): Anti-Examples: What NOT To Do, Checklist Purpose: "Unit Tests for English", Example Checklist Types & Sample Items, Execution Steps, Post-Execution Checks, Pre-Execution Checks, User Input
 
 ### Community 139 - "route.ts"
-Cohesion: 0.20
-Nodes (15): GET(), PATCH(), serializeMe(), BCRYPT_ROUNDS, cookieOptions, secret(), signSession(), verifySession() (+7 more)
+Cohesion: 0.13
+Nodes (20): AdminLayout(), AdminOverview(), CAPS, ROLE_ICON, RolesPage(), UsersPage(), PageHeader(), verifySession() (+12 more)
 
 ### Community 140 - "diff.ts"
 Cohesion: 0.25
@@ -893,8 +892,8 @@ Cohesion: 0.29
 Nodes (6): client, [cmd, ...args], [command, tool, rawArgs], env, text, transport
 
 ### Community 157 - "auth.ts"
-Cohesion: 0.21
-Nodes (12): POST(), GET(), toConnectionView(), ConnectionDoc, connectionSchema, AtlasAuthError, AtlasOrgInfo, digestJson() (+4 more)
+Cohesion: 0.22
+Nodes (10): ApiProject, ConnectionView, Dashboard(), expiresIn(), relativeTime(), ProjectCard(), ProjectSummary, statusTone (+2 more)
 
 ### Community 158 - "SKILL.md"
 Cohesion: 0.29
@@ -953,12 +952,12 @@ Cohesion: 0.33
 Nodes (6): Edge Cases, User Scenarios & Testing *(mandatory)*, User Story 1 - Dependable architecture generation via AWS MCP (Priority: P1), User Story 2 - Attach additional services to an existing architecture (Priority: P1), User Story 3 - Edit the generated cost estimate (Priority: P1), User Story 4 - Export the cost estimate as a client-ready proposal (Priority: P2)
 
 ### Community 172 - "Specification Quality Checklist: Guided Diagram Generation Flow"
-Cohesion: 0.33
+Cohesion: 0.40
 Nodes (5): Content Quality, Feature Readiness, Notes, Requirement Completeness, Specification Quality Checklist: Guided Diagram Generation Flow
 
 ### Community 173 - "Dependencies & Execution Order"
-Cohesion: 0.33
-Nodes (5): applyProviderBudget(), recentRequests(), recordUsage(), LlmUsageDoc, llmUsageSchema
+Cohesion: 0.40
+Nodes (5): MobileNav(), isNavActive(), NAV_ITEMS, Sidebar(), TopNav()
 
 ### Community 174 - "SKILL.md"
 Cohesion: 0.40
@@ -1029,8 +1028,8 @@ Cohesion: 0.50
 Nodes (4): 14.2 MongoDB Resources, MongoDB Atlas Administration API, MongoDB Atlas Pricing, MongoDB MCP Server (Official)
 
 ### Community 192 - "14.3 Diagram Generation"
-Cohesion: 0.50
-Nodes (4): 14.3 Diagram Generation, AWS Architecture Icons Package, Mermaid, React Flow
+Cohesion: 0.23
+Nodes (8): AWS_EXTENDED_SERVICES, CURATED_ICON_FILES, entries, EXTENDED, EXTENDED_ICON_FILES, SKIPPED_ICON_FILES, onDisk, SVC_DIR
 
 ### Community 193 - "Contract: Generation Reliability (FR-001–FR-003)"
 Cohesion: 0.50
@@ -1053,8 +1052,8 @@ Cohesion: 0.50
 Nodes (3): name, private, version
 
 ### Community 198 - "route.ts"
-Cohesion: 0.83
-Nodes (3): GET(), POST(), clearSession()
+Cohesion: 0.20
+Nodes (9): systemPricing, ConfigField, ContainerTypeDef, FieldType, McpRecommendation, McpRecommendResult, PriceQuote, PricingAdapter (+1 more)
 
 ### Community 199 - "Export.ts"
 Cohesion: 0.67
@@ -1065,35 +1064,59 @@ Cohesion: 0.67
 Nodes (3): 14.14 Monitoring, Grafana, OpenTelemetry
 
 ### Community 201 - "14.6 Database"
-Cohesion: 0.50
-Nodes (3): CostEstimateDoc, costEstimateSchema, perServiceSchema
+Cohesion: 0.26
+Nodes (9): ClipboardEdge, ClipboardNode, ClipboardPayload, copyToClipboard(), duplicateSelection(), newId(), pasteFromClipboard(), HANDLE_SIDES (+1 more)
 
 ### Community 202 - "14.8 State Management"
+Cohesion: 0.40
+Nodes (4): computeFlowSteps(), FlowStep, WalkEdge, WalkNode
+
+### Community 307 - "CostEstimateOverride.ts"
+Cohesion: 0.50
+Nodes (4): 14.7 UI Components, Lucide Icons, Shadcn UI, Tailwind CSS
+
+### Community 308 - "SearchBackend"
 Cohesion: 0.67
-Nodes (3): 14.8 State Management, TanStack Query, Zustand
+Nodes (3): 14.4 AI Integration, Anthropic API, OpenAI API
 
 ### Community 309 - "14.5 Authentication"
 Cohesion: 0.67
 Nodes (3): 14.5 Authentication, Auth.js, AWS SDK for JavaScript v3
 
+### Community 310 - "Contract: Guided Generation Flow Protocol"
+Cohesion: 0.29
+Nodes (7): 1. `POST /api/projects/[id]/chat/messages` — request body (additive), 2. Turn routing (server-side, single route), 3. NDJSON stream — event additions (additive), 4. `GET /api/projects/[id]/chat` — response (additive), 5. UI contract (ChatPanel interaction blocks), 6. Backward compatibility, Contract: Guided Generation Flow Protocol
+
+### Community 311 - "LlmUsage.ts"
+Cohesion: 0.33
+Nodes (5): applyProviderBudget(), recentRequests(), recordUsage(), LlmUsageDoc, llmUsageSchema
+
+### Community 312 - "cost-options.test.ts"
+Cohesion: 0.50
+Nodes (3): ec2Node, lambdaNode, llmJsonMock
+
+### Community 313 - "14.12 Export"
+Cohesion: 0.67
+Nodes (3): 14.12 Export, html-to-image, jsPDF
+
 ## Knowledge Gaps
-- **1382 isolated node(s):** `npx`, `eslintConfig`, `csp`, `securityHeaders`, `nextConfig` (+1377 more)
+- **1392 isolated node(s):** `npx`, `eslintConfig`, `csp`, `securityHeaders`, `nextConfig` (+1387 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **113 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **111 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `resolveServiceDef()` connect `ExplainFlow.tsx` to `orchestrator.ts`, `catalog.ts`, `Canvas.tsx`, `AIConversation.ts`, `Next Env Types`, `page.tsx`, `parse.ts`, `page.tsx`, `guides.ts`, `cost-options.ts`, `intent.ts`?**
-  _High betweenness centrality (0.022) - this node is a cross-community bridge._
-- **Why does `cn()` connect `page.tsx` to `Admin Panel UI`, `AI Generator Page`, `Canvas.tsx`, `Dashboard & Connections UI`, `page.tsx`, `ExplainFlow.tsx`, `cn`?**
-  _High betweenness centrality (0.022) - this node is a cross-community bridge._
-- **Why does `fail()` connect `Next Env Types` to `Auth & Admin APIs`, `route.ts`, `schemas.ts`, `route.ts`, `route.ts`, `route.ts`, `llm-usage.ts`, `store.ts`, `auth.ts`, `route.ts`?**
-  _High betweenness centrality (0.015) - this node is a cross-community bridge._
+- **Why does `cn()` connect `cn` to `Admin Panel UI`, `catalog.ts`, `AI Generator Page`, `Canvas.tsx`, `Dashboard & Connections UI`, `Dependencies & Execution Order`, `page.tsx`, `ExplainFlow.tsx`, `page.tsx`, `auth.ts`?**
+  _High betweenness centrality (0.027) - this node is a cross-community bridge._
+- **Why does `resolveServiceDef()` connect `ExplainFlow.tsx` to `types.ts`, `orchestrator.ts`, `catalog.ts`, `Canvas.tsx`, `Dashboard & Connections UI`, `AIConversation.ts`, `parse.ts`, `serialize.ts`, `cost-options.ts`, `intent.ts`, `route.ts`?**
+  _High betweenness centrality (0.024) - this node is a cross-community bridge._
+- **Why does `fail()` connect `Next Env Types` to `route.ts`, `Auth & Admin APIs`, `Architecture.ts`, `seed.ts`, `schemas.ts`, `route.ts`, `route.ts`, `llm-usage.ts`, `store.ts`, `serialize.ts`?**
+  _High betweenness centrality (0.018) - this node is a cross-community bridge._
 - **What connects `npx`, `eslintConfig`, `csp` to the rest of the system?**
-  _1391 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _1401 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Admin Panel UI` be split into smaller, more focused modules?**
-  _Cohesion score 0.08792270531400966 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.12923076923076923 - nodes in this community are weakly interconnected._
 - **Should `AI Generator Page` be split into smaller, more focused modules?**
   _Cohesion score 0.12873563218390804 - nodes in this community are weakly interconnected._
 - **Should `Dependencies & Packaging` be split into smaller, more focused modules?**

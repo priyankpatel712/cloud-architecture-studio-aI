@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Search } from 'lucide-react';
 import { ServiceIcon } from '@/components/ui/Icon';
-import { SERVICES, PROVIDERS, type Provider } from '@/lib/catalog';
+import { SERVICES, PROVIDERS, type Provider, type ServiceDef } from '@/lib/catalog';
 import { cn } from '@/lib/cn';
 
 /** Left rail: searchable, provider-grouped, draggable service catalog. */
@@ -24,6 +24,15 @@ export function Palette({
       s.category.toLowerCase().includes(q.toLowerCase());
     return matchP && matchQ;
   });
+
+  // With the full official icon set (~300 AWS services) a flat list is
+  // unbrowsable — group by category, preserving catalog order (curated
+  // cost-modelled services stay ahead of extended icon-only entries).
+  const groups = new Map<string, ServiceDef[]>();
+  for (const s of filtered) {
+    if (!groups.has(s.category)) groups.set(s.category, []);
+    groups.get(s.category)!.push(s);
+  }
 
   return (
     <aside
@@ -61,23 +70,30 @@ export function Palette({
       </div>
 
       <div className="custom-scrollbar flex-1 overflow-y-auto p-2">
-        {filtered.map((s) => (
-          <div
-            key={s.id}
-            draggable
-            onDragStart={(e) => {
-              e.dataTransfer.setData('application/service-id', s.id);
-              e.dataTransfer.effectAllowed = 'move';
-            }}
-            onClick={() => onAdd(s.id)}
-            title={s.blurb}
-            className="group mb-1 flex cursor-grab items-center gap-2.5 rounded-xl border border-transparent p-2 transition-all hover:border-[var(--color-surface-variant)] hover:bg-[var(--color-surface-container-low)] active:cursor-grabbing"
-          >
-            <ServiceIcon def={s} size={32} className="shrink-0" />
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium text-[var(--color-text-primary)]">{s.name}</p>
-              <p className="truncate text-[11px] text-[var(--color-text-secondary)]">{s.blurb}</p>
-            </div>
+        {[...groups.entries()].map(([category, items]) => (
+          <div key={category}>
+            <p className="sticky top-0 z-10 -mx-2 mb-1 bg-[var(--color-surface)]/95 px-4 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text-secondary)] backdrop-blur-sm">
+              {category} <span className="font-normal opacity-70">· {items.length}</span>
+            </p>
+            {items.map((s) => (
+              <div
+                key={s.id}
+                draggable
+                onDragStart={(e) => {
+                  e.dataTransfer.setData('application/service-id', s.id);
+                  e.dataTransfer.effectAllowed = 'move';
+                }}
+                onClick={() => onAdd(s.id)}
+                title={s.blurb}
+                className="group mb-1 flex cursor-grab items-center gap-2.5 rounded-xl border border-transparent p-2 transition-all hover:border-[var(--color-surface-variant)] hover:bg-[var(--color-surface-container-low)] active:cursor-grabbing"
+              >
+                <ServiceIcon def={s} size={32} className="shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-[var(--color-text-primary)]">{s.name}</p>
+                  <p className="truncate text-[11px] text-[var(--color-text-secondary)]">{s.blurb}</p>
+                </div>
+              </div>
+            ))}
           </div>
         ))}
         {filtered.length === 0 && (
